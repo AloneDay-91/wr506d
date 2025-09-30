@@ -2,16 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+
 use App\Repository\ActorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+
 #[ORM\Entity(repositoryClass: ActorRepository::class)]
 #[ApiResource]
 #[ORM\HasLifecycleCallbacks]
+
+#[ApiFilter(SearchFilter::class, properties: ['lastname' => 'start', 'firstname' => 'start', 'bio' => 'partial', 'photo' => 'partial'])]
+#[ApiFilter(DateFilter::class, properties: ['dob','dof'])]
+
 class Actor
 {
     #[ORM\Id]
