@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Director;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker;
@@ -20,6 +21,7 @@ class DataFixtures extends Fixture
 
         $categoriesArray = [];
         $actorsArray = [];
+        $directorsArray = [];
 
         $imageUrl = 'https://placehold.co/600x400';
 
@@ -45,9 +47,32 @@ class DataFixtures extends Fixture
             $manager->persist($actor);
         }
 
+        $fakerDirector = \Faker\Factory::create();
+        $fakerDirector->addProvider(new \Xylis\FakerCinema\Provider\Person($fakerDirector));
+        $directors = $fakerDirector->directors($gender = null, $count = 50, $duplicates = false);
+
+        foreach ($directors as $item) {
+            $director = new Director();
+
+            $fullname = $item;
+            $names = explode(' ', $fullname);
+            $director->setFirstname($names[0]);
+            $director->setLastname($names[1]);
+
+            $director->setDob($fakerDirector->dateTimeThisCentury());
+            if ($fakerDirector->boolean(20)) {
+                $director->setDod($fakerDirector->dateTimeBetween($director->getDob(), 'now'));
+            }
+
+            $directorsArray[] = $director;
+
+            $manager->persist($director);
+        }
+
         $fakerMovie = \Faker\Factory::create();
         $fakerMovie->addProvider(new \Xylis\FakerCinema\Provider\Movie($fakerMovie));
         $movies = $fakerMovie->movies($count = 199);
+        $MovieUrl = $fakerMovie->url();
 
         foreach ($movies as $item) {
             $movie = new Movie();
@@ -78,6 +103,12 @@ class DataFixtures extends Fixture
             foreach (array_splice($actorsArray, 0, rand(2,6))as $actor){
                 $movie->addActor($actor);
             }
+
+            $movie->setDirector($directorsArray[array_rand($directorsArray)]);
+            $movie->setNbEntries(rand(0, 1000000));
+            $movie->setUrl($MovieUrl);
+            $movie->setBudget(rand(0, 50000000));
+
             $movie->addCategory($category);
             $manager->persist($movie);
         }
