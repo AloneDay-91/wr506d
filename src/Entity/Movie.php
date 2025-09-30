@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MovieRepository::class)]
 #[ApiResource]
@@ -27,18 +28,25 @@ class Movie
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'string', message: 'The name must be a string.')]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Type(type: 'string', message: 'The description must be a string.')]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\Type(type: 'integer', message: 'The duration must be an integer.')]
+    #[Assert\Range(min: 60, max: 300, notInRangeMessage: 'The duration must be between 60 and 300 minutes.')]
     private ?int $duration = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\DateTime]
     private ?\DateTime $releaseDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Type(type: 'string', message: 'The image must be a string.')]
     private ?string $image = null;
 
     #[ORM\Column]
