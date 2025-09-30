@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Repository\ActorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,21 +30,28 @@ class Actor
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'string', message: 'The name must be a string.')]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Type(type: 'string', message: 'The firstname must be a string.')]
     private ?string $firstname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\DateTime]
     private ?\DateTime $dob = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Assert\DateTime]
     private ?\DateTime $dod = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Type(type: 'string', message: 'The bio must be a string.')]
     private ?string $bio = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Type(type: 'string', message: 'The photo must be a string.')]
     private ?string $photo = null;
 
     /**
