@@ -72,7 +72,6 @@ class DataFixtures extends Fixture
         $fakerMovie = \Faker\Factory::create();
         $fakerMovie->addProvider(new \Xylis\FakerCinema\Provider\Movie($fakerMovie));
         $movies = $fakerMovie->movies($count = 199);
-        $MovieUrl = $fakerMovie->url();
 
         foreach ($movies as $item) {
             $movie = new Movie();
@@ -106,7 +105,7 @@ class DataFixtures extends Fixture
 
             $movie->setDirector($directorsArray[array_rand($directorsArray)]);
             $movie->setNbEntries(rand(0, 1000000));
-            $movie->setUrl($MovieUrl);
+            $movie->setUrl($fakerMovie->url());
             $movie->setBudget(rand(0, 50000000));
 
             $movie->addCategory($category);
