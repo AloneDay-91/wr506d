@@ -54,3 +54,7 @@
 .idea
 .env*
 .DS_Store
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

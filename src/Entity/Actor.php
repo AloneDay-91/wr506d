@@ -6,6 +6,11 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use App\Repository\ActorRepository;
@@ -21,6 +26,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ApiFilter(SearchFilter::class, properties: ['lastname' => 'start', 'firstname' => 'start', 'bio' => 'partial', 'photo' => 'partial'])]
 #[ApiFilter(DateFilter::class, properties: ['dob','dof'])]
+#[Get]
+#[Put(security: "is_granted('ROLE_ADMIN') or object.owner == user")]
+#[GetCollection]
+#[Post(security: "is_granted('ROLE_ADMIN')")]
+#[Delete(security: "is_granted('ROLE_ADMIN')")]
 
 class Actor
 {
