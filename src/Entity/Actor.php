@@ -60,9 +60,9 @@ class Actor
     #[Assert\Type(type: 'string', message: 'The bio must be a string.')]
     private ?string $bio = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+   /* #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Type(type: 'string', message: 'The photo must be a string.')]
-    private ?string $photo = null;
+    private ?string $photo = null;*/
 
     /**
      * @var Collection<int, Movie>
@@ -72,6 +72,9 @@ class Actor
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'actors')]
+    private ?MediaObject $photo = null;
 
     public function __construct()
     {
@@ -143,16 +146,23 @@ class Actor
         return $this;
     }
 
-    public function getPhoto(): ?string
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->photo;
+        return $this->createdAt;
     }
 
-    public function setPhoto(?string $photo): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->photo = $photo;
+        $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     /**
@@ -179,22 +189,15 @@ class Actor
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getPhoto(): ?MediaObject
     {
-        return $this->createdAt;
+        return $this->photo;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setPhoto(?MediaObject $photo): static
     {
-        $this->createdAt = $createdAt;
+        $this->photo = $photo;
 
         return $this;
-    }
-
-
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
-    {
-        $this->createdAt = new \DateTimeImmutable();
     }
 }
