@@ -57,10 +57,6 @@ class Movie
     #[Assert\DateTime]
     private ?\DateTime $releaseDate = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Type(type: 'string', message: 'The image must be a string.')]
-    private ?string $image = null;
-
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -89,6 +85,9 @@ class Movie
     #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotNull]
     private ?Director $director = null;
+
+    #[ORM\ManyToOne(inversedBy: 'movies')]
+    private ?MediaObject $image = null;
 
     public function __construct()
     {
@@ -145,18 +144,6 @@ class Movie
     public function setReleaseDate(?\DateTime $releaseDate): static
     {
         $this->releaseDate = $releaseDate;
-
-        return $this;
-    }
-
-    public function getImage(): ?string
-    {
-        return $this->image;
-    }
-
-    public function setImage(?string $image): static
-    {
-        $this->image = $image;
 
         return $this;
     }
@@ -277,6 +264,18 @@ class Movie
     public function setDirector(?Director $director): static
     {
         $this->director = $director;
+
+        return $this;
+    }
+
+    public function getImage(): ?MediaObject
+    {
+        return $this->image;
+    }
+
+    public function setImage(?MediaObject $image): static
+    {
+        $this->image = $image;
 
         return $this;
     }
