@@ -8,11 +8,21 @@ use Doctrine\Persistence\ObjectManager;
 use App\Entity\Actor;
 use App\Entity\Movie;
 use App\Entity\Category;
-use Faker\Factory;
+use Faker\Generator;
 use Xylis\FakerCinema\Provider\Person;
+use Xylis\FakerCinema\Provider\Movie as MovieProvider;
 
 class DataFixtures extends Fixture
 {
+    private Generator $faker;
+
+    public function __construct(Generator $faker)
+    {
+        $this->faker = $faker;
+        $this->faker->addProvider(new Person($this->faker));
+        $this->faker->addProvider(new MovieProvider($this->faker));
+    }
+
     public function load(ObjectManager $manager): void
     {
         $imageUrl = 'https://placehold.co/600x400';
@@ -27,8 +37,7 @@ class DataFixtures extends Fixture
 
     private function loadActors(ObjectManager $manager, string $imageUrl): array
     {
-        $faker = Factory::create();
-        $faker->addProvider(new Person($faker));
+        $faker = $this->faker;
         $actors = $faker->actors($gender = null, $count = 190, $duplicates = false);
         $actorsArray = [];
 
@@ -56,8 +65,7 @@ class DataFixtures extends Fixture
 
     private function loadDirectors(ObjectManager $manager): array
     {
-        $faker = Factory::create();
-        $faker->addProvider(new Person($faker));
+        $faker = $this->faker;
         $directors = $faker->directors($gender = null, $count = 50, $duplicates = false);
         $directorsArray = [];
 
@@ -87,8 +95,7 @@ class DataFixtures extends Fixture
         array &$categoriesArray,
         string $imageUrl
     ): void {
-        $faker = Factory::create();
-        $faker->addProvider(new Movie($faker));
+        $faker = $this->faker;
         $movies = $faker->movies($count = 199);
 
         foreach ($movies as $item) {
