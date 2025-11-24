@@ -12,6 +12,7 @@ use App\Repository\DirectorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DirectorRepository::class)]
 
@@ -30,12 +31,17 @@ class Director
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'string', message: 'The lastname must be a string.')]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'string', message: 'The firstname must be a string.')]
     private ?string $firstname = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank]
     private ?\DateTime $dob = null;
 
     #[ORM\Column(nullable: true)]

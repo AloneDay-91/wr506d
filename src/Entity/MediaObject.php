@@ -1,4 +1,5 @@
 <?php
+
 // api/src/Entity/MediaObject.php
 
 namespace App\Entity;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use DateTimeImmutable;
 
 #[Vich\Uploadable]
 #[ORM\Entity]
@@ -67,7 +69,7 @@ class MediaObject
     public ?string $filePath = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, Actor>
@@ -92,12 +94,12 @@ class MediaObject
         return $this->id;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -107,7 +109,7 @@ class MediaObject
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     /**

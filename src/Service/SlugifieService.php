@@ -2,13 +2,15 @@
 
 namespace App\Service;
 
-Use Cocur\Slugify\Slugify;
+use Cocur\Slugify\Slugify;
 
 class SlugifieService
 {
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
-    function slugify($string)
+    public function slugify(string $string): string
     {
         $slugify = new Slugify();
         return $slugify->slugify($string);

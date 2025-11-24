@@ -12,19 +12,19 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use App\Repository\ActorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ActorRepository::class)]
 #[ApiResource]
 #[ORM\HasLifecycleCallbacks]
 
-#[ApiFilter(SearchFilter::class, properties: ['lastname' => 'start', 'firstname' => 'start', 'bio' => 'partial', 'photo' => 'partial'])]
+#[ApiFilter(SearchFilter::class, properties:
+    ['lastname' => 'start', 'firstname' => 'start', 'bio' => 'partial', 'photo' => 'partial'])]
 #[ApiFilter(DateFilter::class, properties: ['dob','dof'])]
 #[Get]
 #[Put(security: "is_granted('ROLE_ADMIN') or object.owner == user")]
@@ -49,11 +49,9 @@ class Actor
     private ?string $firstname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Assert\DateTime]
     private ?\DateTime $dob = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Assert\DateTime]
     private ?\DateTime $dod = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -71,7 +69,7 @@ class Actor
     private Collection $movies;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'actors')]
     private ?MediaObject $photo = null;
@@ -146,12 +144,12 @@ class Actor
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -162,7 +160,7 @@ class Actor
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     /**
