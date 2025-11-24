@@ -9,7 +9,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-
 use App\Repository\ActorRepository;
 use App\Repository\MovieRepository;
 use App\Repository\CategoryRepository;
@@ -27,21 +26,29 @@ class CountCommand extends Command
 
     private CategoryRepository $categoryRepository;
 
-    private MediaObjectRepository $mediaObjectRepository;
+    private MediaObjectRepository $mediaObjectRepo;
 
-    public function __construct(ActorRepository $actorRepository, MovieRepository $movieRepository, CategoryRepository $categoryRepository, MediaObjectRepository $mediaObjectRepository)
-    {
+    public function __construct(
+        ActorRepository $actorRepository,
+        MovieRepository $movieRepository,
+        CategoryRepository $categoryRepository,
+        MediaObjectRepository $mediaObjectRepo
+    ) {
         parent::__construct();
         $this->actorRepository = $actorRepository;
         $this->movieRepository = $movieRepository;
         $this->categoryRepository = $categoryRepository;
-        $this->mediaObjectRepository = $mediaObjectRepository;
+        $this->mediaObjectRepo = $mediaObjectRepo;
     }
 
     protected function configure(): void
     {
         $this
-            ->addArgument('entity', InputArgument::OPTIONAL, 'Entity to display (All, Actors, Movies, Categories, MediaObjects)')
+            ->addArgument(
+                'entity',
+                InputArgument::OPTIONAL,
+                'Entity to display (All, Actors, Movies, Categories, MediaObjects)'
+            )
             ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
         ;
     }
@@ -49,37 +56,43 @@ class CountCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        // Determine which entity the user wants to display. If provided as argument use it, otherwise ask interactively.
-        $entityArg = $input->getArgument('entity');
-
-        $choices = ['All', 'Actors', 'Movies', 'Categories', 'MediaObjects'];
-
-        if ($entityArg) {
-            $selection = $entityArg;
-        } else {
-            $selection = $io->choice('Quelle entité voulez-vous afficher dans le tableau ?', $choices, 'All');
-        }
-
-        $selection = (string) $selection;
+        $selection = $this->getEntitySelection($input, $io);
 
         $io->note(sprintf('Sélection: %s', $selection));
 
-        /*
-        $io->info('Nb of actors in database : ' .$this->actorRepository->count());
-        $io->info('Nb of movies in database : ' .$this->movieRepository->count());
-        $io->info('Nb of categories in database : ' .$this->categoryRepository->count());
-        $imageCount = $this->mediaObjectRepository->count();
-        $io->info('Nb of media objects in database : ' . $imageCount);
-        */
+        $this->displayEntityCounts($io, $selection);
+        $this->displayMediaObjectsTable($io, $selection);
 
-        $header = [
-            'Nom de l\'entité',
-            'Nombre d\'éléments'
-        ];
+        return Command::SUCCESS;
+    }
 
+    private function getEntitySelection(InputInterface $input, SymfonyStyle $io): string
+    {
+        $entityArg = $input->getArgument('entity');
+        $choices = ['All', 'Actors', 'Movies', 'Categories', 'MediaObjects'];
+
+        if ($entityArg) {
+            return (string) $entityArg;
+        }
+
+        return $io->choice(
+            'Quelle entité voulez-vous afficher dans le tableau ?',
+            $choices,
+            'All'
+        );
+    }
+
+    private function displayEntityCounts(SymfonyStyle $io, string $selection): void
+    {
+        $header = ['Nom de l\'entité', 'Nombre d\'éléments'];
+        $elements = $this->buildEntityCountsData($selection);
+
+        $io->table($header, $elements);
+    }
+
+    private function buildEntityCountsData(string $selection): array
+    {
         $elements = [];
-
-        // Prepare counts according to selection
         $sel = strtolower($selection);
 
         if ($sel === 'all' || $sel === 'actors') {
@@ -92,45 +105,55 @@ class CountCommand extends Command
             $elements[] = ['Categories', $this->categoryRepository->count()];
         }
         if ($sel === 'all' || $sel === 'mediaobjects') {
-            $elements[] = ['MediaObjects', $this->mediaObjectRepository->count()];
+            $elements[] = ['MediaObjects', $this->mediaObjectRepo->count()];
         }
 
-        $io->table($header, $elements);
+        return $elements;
+    }
 
+    private function displayMediaObjectsTable(SymfonyStyle $io, string $selection): void
+    {
+        $sel = strtolower($selection);
+
+        if ($sel !== 'all' && $sel !== 'mediaobjects') {
+            return;
+        }
+
+        $medias = $this->mediaObjectRepo->findAll();
         $elements = [];
+        $totalSize = 0;
 
-        // If the selection includes MediaObjects, show the media files table
-        if ($sel === 'all' || $sel === 'mediaobjects') {
-            $medias = $this->mediaObjectRepository->findAll();
-            $totalSize = 0;
-            foreach ($medias as $media) {
-                $filePath = $media->filePath;
-                $fullPath = '/var/www/html/wr506d/public/media/' . ($filePath ?? '');
-                if ($filePath && file_exists($fullPath)) {
-                    $filesize = filesize($fullPath);
-                } else {
-                    $filesize = 0;
-                }
-                $totalSize += $filesize;
-                $elements[] = [
-                    $filePath ?? '(no file)',
-                    $filesize > 0 ? $filesize.' octets' : 'missing'
-                ];
-            }
-
-            $header = [
-                'Image',
-                'Poids'
-            ];
-
+        foreach ($medias as $media) {
+            $fileData = $this->getMediaFileData($media);
+            $totalSize += $fileData['size'];
             $elements[] = [
-                'Poids total',
-                round(($totalSize/1024/1024), 2).' Mo'
+                $fileData['path'],
+                $fileData['display']
             ];
-
-            $io->table($header, $elements);
         }
 
-        return Command::SUCCESS;
+        $elements[] = [
+            'Poids total',
+            round(($totalSize / 1024 / 1024), 2) . ' Mo'
+        ];
+
+        $io->table(['Image', 'Poids'], $elements);
+    }
+
+    private function getMediaFileData($media): array
+    {
+        $filePath = $media->filePath;
+        $fullPath = '/var/www/html/wr506d/public/media/' . ($filePath ?? '');
+        $filesize = 0;
+
+        if ($filePath && file_exists($fullPath)) {
+            $filesize = filesize($fullPath);
+        }
+
+        return [
+            'path' => $filePath ?? '(no file)',
+            'size' => $filesize,
+            'display' => $filesize > 0 ? $filesize . ' octets' : 'missing'
+        ];
     }
 }
