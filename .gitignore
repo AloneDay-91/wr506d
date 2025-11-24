@@ -54,7 +54,6 @@
 .idea
 .env.dev
 .env.local
-.env.test
 .DS_Store
 
 ###> lexik/jwt-authentication-bundle ###
