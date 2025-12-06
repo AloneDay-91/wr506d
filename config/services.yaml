@@ -27,3 +27,7 @@ services:
             $anonymousApiLimiter: '@limiter.anonymous_api'
             $authenticatedApiLimiter: '@limiter.authenticated_api'
 
+    App\State\UserPasswordHasher:
+        bind:
+            $processor: '@api_platform.doctrine.orm.state.persist_processor'
+

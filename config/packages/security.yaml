@@ -40,6 +40,8 @@ security:
         #- { path: ^/auth, roles: PUBLIC_ACCESS }
         #- { path: ^/, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS } # Allows accessing API documentations and Swagger UI docs
+        - { path: ^/api/graphql, roles: PUBLIC_ACCESS } # Allows accessing GraphQL endpoint
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: [POST] } # Allows user registration
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
