@@ -21,3 +21,9 @@ services:
 
     Faker\Generator:
         factory: ['Faker\Factory', 'create']
+
+    App\EventSubscriber\ApiRateLimitSubscriber:
+        arguments:
+            $anonymousApiLimiter: '@limiter.anonymous_api'
+            $authenticatedApiLimiter: '@limiter.authenticated_api'
+

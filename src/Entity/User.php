@@ -58,6 +58,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Type(type: 'string', message: 'The lastname must be a string.')]
     private ?string $lastname = null;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    #[Assert\Positive(message: 'The rate limit must be a positive number.')]
+    private int $rateLimit = 100;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -159,6 +163,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastname(string $lastname): static
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getRateLimit(): int
+    {
+        return $this->rateLimit;
+    }
+
+    public function setRateLimit(int $rateLimit): static
+    {
+        $this->rateLimit = $rateLimit;
 
         return $this;
     }
