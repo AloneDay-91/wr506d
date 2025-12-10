@@ -57,7 +57,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
 
         // Select appropriate rate limiter
         // For authenticated users, check if they have a custom rate limit
-        if ($isAuthenticated && $user instanceof User) {
+        if ($isAuthenticated && $user instanceof User && $user->getRateLimit() !== null) {
             $userRateLimit = $user->getRateLimit();
             $limiter = $this->authenticatedApiLimiter->create($identifier);
 

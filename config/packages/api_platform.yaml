@@ -8,9 +8,6 @@ api_platform:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
-        pagination_items_per_page: 30           # Nombre par défaut par page
-        pagination_maximum_items_per_page: 100  # Maximum autorisé
-        pagination_client_items_per_page: true  # Permet au client de choisir
 
     formats:
         jsonld: ['application/ld+json']
