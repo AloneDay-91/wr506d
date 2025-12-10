@@ -4,12 +4,12 @@ framework:
         # Rate limiter for anonymous API users
         anonymous_api:
             policy: 'sliding_window'
-            limit: 30
+            limit: 3
             interval: '1 minute'
 
         # Rate limiter for authenticated API users (default limit)
         authenticated_api:
-            policy: 'sliding_window'
+            policy: 'token_bucket'
             limit: 100
-            interval: '1 minute'
+            rate: {interval: '2 minutes', amount: 100}
 

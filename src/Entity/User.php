@@ -94,10 +94,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $lastname = null;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    #[ORM\Column(type: 'integer', nullable: true)]
     #[Assert\Positive(message: 'The rate limit must be a positive number.')]
     #[Groups(['user:read'])]
-    private int $rateLimit = 100;
+    private ?int $rateLimit = null;
 
     #[ORM\ManyToOne(targetEntity: MediaObject::class, inversedBy: 'users')]
     #[Groups(['user:read', 'user:create', 'user:update'])]
@@ -232,12 +232,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRateLimit(): int
+    public function getRateLimit(): ?int
     {
         return $this->rateLimit;
     }
 
-    public function setRateLimit(int $rateLimit): static
+    public function setRateLimit(?int $rateLimit): static
     {
         $this->rateLimit = $rateLimit;
 

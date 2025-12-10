@@ -77,6 +77,7 @@ class MediaObject
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
     #[Assert\NotNull(groups: ['media_object:create'])]
+    #[Groups(['media_object:write'])]
     public ?File $file = null;
 
     #[ApiProperty(writable: false)]
@@ -89,6 +90,7 @@ class MediaObject
     private string $type = self::TYPE_OTHER;
 
     #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['media_object:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     /**
