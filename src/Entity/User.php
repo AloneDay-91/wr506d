@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
 use App\State\UserPasswordHasher;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -98,6 +99,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Positive(message: 'The rate limit must be a positive number.')]
     #[Groups(['user:read'])]
     private ?int $rateLimit = null;
+
+    #[ORM\Column(type: 'string', length: 64, nullable: true, unique: true)]
+    #[Assert\Length(exactly: 64, exactMessage: 'The API key hash must be exactly {{ limit }} characters.')]
+    private ?string $apiKeyHash = null;
+
+    #[ORM\Column(type: 'string', length: 16, nullable: true)]
+    #[Assert\Length(exactly: 16, exactMessage: 'The API key prefix must be exactly {{ limit }} characters.')]
+    #[Groups(['user:read'])]
+    private ?string $apiKeyPrefix = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[Groups(['user:read'])]
+    private bool $apiKeyEnabled = false;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['user:read'])]
+    private ?\DateTimeImmutable $apiKeyCreatedAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['user:read'])]
+    private ?\DateTimeImmutable $apiKeyLastUsedAt = null;
 
     #[ORM\ManyToOne(targetEntity: MediaObject::class, inversedBy: 'users')]
     #[Groups(['user:read', 'user:create', 'user:update'])]
@@ -284,5 +306,70 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getApiKeyHash(): ?string
+    {
+        return $this->apiKeyHash;
+    }
+
+    public function setApiKeyHash(?string $apiKeyHash): static
+    {
+        $this->apiKeyHash = $apiKeyHash;
+
+        return $this;
+    }
+
+    public function getApiKeyPrefix(): ?string
+    {
+        return $this->apiKeyPrefix;
+    }
+
+    public function setApiKeyPrefix(?string $apiKeyPrefix): static
+    {
+        $this->apiKeyPrefix = $apiKeyPrefix;
+
+        return $this;
+    }
+
+    public function isApiKeyEnabled(): bool
+    {
+        return $this->apiKeyEnabled;
+    }
+
+    public function setApiKeyEnabled(bool $apiKeyEnabled): static
+    {
+        $this->apiKeyEnabled = $apiKeyEnabled;
+
+        return $this;
+    }
+
+    public function getApiKeyCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->apiKeyCreatedAt;
+    }
+
+    public function setApiKeyCreatedAt(?\DateTimeImmutable $apiKeyCreatedAt): static
+    {
+        $this->apiKeyCreatedAt = $apiKeyCreatedAt;
+
+        return $this;
+    }
+
+    public function getApiKeyLastUsedAt(): ?\DateTimeImmutable
+    {
+        return $this->apiKeyLastUsedAt;
+    }
+
+    public function setApiKeyLastUsedAt(?\DateTimeImmutable $apiKeyLastUsedAt): static
+    {
+        $this->apiKeyLastUsedAt = $apiKeyLastUsedAt;
+
+        return $this;
+    }
+
+    public function updateApiKeyLastUsedAt(): void
+    {
+        $this->apiKeyLastUsedAt = new DateTimeImmutable();
     }
 }

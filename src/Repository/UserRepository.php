@@ -33,6 +33,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Update the API key last used timestamp for a user.
+     */
+    public function updateApiKeyLastUsedAt(User $user): void
+    {
+        $user->updateApiKeyLastUsedAt();
+        $this->getEntityManager()->flush();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

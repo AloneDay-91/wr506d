@@ -3,8 +3,10 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
+use DateTimeImmutable;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -34,74 +36,108 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
     {
         $request = $event->getRequest();
 
-        // Only apply rate limiting to API routes
-        if (!str_starts_with($request->getPathInfo(), '/api/')) {
+        if (!$this->shouldApplyRateLimiting($request)) {
             return;
+        }
+
+        $user = $this->getAuthenticatedUser();
+        $isAuthenticated = $user instanceof UserInterface;
+        $identifier = $this->getIdentifier($user, $request);
+
+        if ($this->hasCustomRateLimit($user)) {
+            /** @var User $user */
+            $this->applyCustomRateLimit($event, $request, $user, $identifier);
+            return;
+        }
+
+        $this->applyStandardRateLimit($event, $request, $isAuthenticated, $identifier);
+    }
+
+    private function shouldApplyRateLimiting(Request $request): bool
+    {
+        $path = $request->getPathInfo();
+
+        if (!str_starts_with($path, '/api/')) {
+            return false;
         }
 
         // Don't rate limit documentation endpoints
-        if (str_starts_with($request->getPathInfo(), '/api/docs') ||
-            str_starts_with($request->getPathInfo(), '/api/graphql/graphiql')) {
-            return;
+        return !str_starts_with($path, '/api/docs')
+            && !str_starts_with($path, '/api/graphql/graphiql');
+    }
+
+    private function getAuthenticatedUser(): ?UserInterface
+    {
+        $token = $this->tokenStorage->getToken();
+        return $token?->getUser();
+    }
+
+    private function getIdentifier(?UserInterface $user, Request $request): string
+    {
+        if ($user instanceof UserInterface) {
+            return $user->getUserIdentifier();
         }
 
-        // Determine if user is authenticated via JWT bearer token
-        $token = $this->tokenStorage->getToken();
-        $user = $token?->getUser();
-        $isAuthenticated = $user instanceof UserInterface;
+        return $request->getClientIp() ?? 'unknown';
+    }
 
-        // Use IP address as identifier for anonymous users, user ID for authenticated users
-        $identifier = $isAuthenticated
-            ? $user->getUserIdentifier()
-            : $request->getClientIp() ?? 'unknown';
+    private function hasCustomRateLimit(?UserInterface $user): bool
+    {
+        return $user instanceof User && $user->getRateLimit() !== null;
+    }
 
-        // Select appropriate rate limiter
-        // For authenticated users, check if they have a custom rate limit
-        if ($isAuthenticated && $user instanceof User && $user->getRateLimit() !== null) {
-            $userRateLimit = $user->getRateLimit();
-            $limiter = $this->authenticatedApiLimiter->create($identifier);
+    private function applyCustomRateLimit(
+        RequestEvent $event,
+        Request $request,
+        User $user,
+        string $identifier
+    ): void {
+        $userRateLimit = $user->getRateLimit();
+        $limiter = $this->authenticatedApiLimiter->create($identifier);
+        $limit = $limiter->consume(1);
 
-            // Override the limit based on user's personal rate limit
-            $limit = $limiter->consume(1);
+        $request->attributes->set('_rate_limit', [
+            'limit' => $userRateLimit,
+            'remaining' => max(0, $userRateLimit - (100 - $limit->getRemainingTokens())),
+            'reset' => $limit->getRetryAfter()->getTimestamp(),
+            'is_custom' => true,
+        ]);
 
-            // Store custom limit info for the user
-            $request->attributes->set('_rate_limit', [
-                'limit' => $userRateLimit,
-                'remaining' => max(0, $userRateLimit - (100 - $limit->getRemainingTokens())),
-                'reset' => $limit->getRetryAfter()->getTimestamp(),
-                'is_custom' => true,
-            ]);
-
-            // Check against user's custom limit
-            $consumed = 100 - $limit->getRemainingTokens();
-            if ($consumed > $userRateLimit) {
-                $this->sendRateLimitExceededResponse($event, $userRateLimit, $limit->getRetryAfter());
-                return;
-            }
-        } else {
-            $limiter = $isAuthenticated
-                ? $this->authenticatedApiLimiter->create($identifier)
-                : $this->anonymousApiLimiter->create($identifier);
-
-            // Consume a token from the rate limiter
-            $limit = $limiter->consume();
-
-            // Store rate limit info in request attributes for the response listener
-            $request->attributes->set('_rate_limit', [
-                'limit' => $limit->getLimit(),
-                'remaining' => $limit->getRemainingTokens(),
-                'reset' => $limit->getRetryAfter()->getTimestamp(),
-                'is_custom' => false,
-            ]);
-
-            if (!$limit->isAccepted()) {
-                $this->sendRateLimitExceededResponse($event, $limit->getLimit(), $limit->getRetryAfter());
-            }
+        $consumed = 100 - $limit->getRemainingTokens();
+        if ($consumed > $userRateLimit) {
+            $this->sendRateLimitExceededResponse($event, $userRateLimit, $limit->getRetryAfter());
         }
     }
 
-    private function sendRateLimitExceededResponse(RequestEvent $event, int $limit, \DateTimeImmutable $retryAfter): void
-    {
+    private function applyStandardRateLimit(
+        RequestEvent $event,
+        Request $request,
+        bool $isAuthenticated,
+        string $identifier
+    ): void {
+        $limiter = $isAuthenticated
+            ? $this->authenticatedApiLimiter->create($identifier)
+            : $this->anonymousApiLimiter->create($identifier);
+
+        $limit = $limiter->consume();
+
+        $request->attributes->set('_rate_limit', [
+            'limit' => $limit->getLimit(),
+            'remaining' => $limit->getRemainingTokens(),
+            'reset' => $limit->getRetryAfter()->getTimestamp(),
+            'is_custom' => false,
+        ]);
+
+        if (!$limit->isAccepted()) {
+            $this->sendRateLimitExceededResponse($event, $limit->getLimit(), $limit->getRetryAfter());
+        }
+    }
+
+    private function sendRateLimitExceededResponse(
+        RequestEvent $event,
+        int $limit,
+        DateTimeImmutable $retryAfter
+    ): void {
         $response = new JsonResponse(
             [
                 'error' => 'Too Many Requests',
@@ -136,4 +172,3 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         $response->headers->set('X-RateLimit-Reset', (string) $rateLimitInfo['reset']);
     }
 }
-

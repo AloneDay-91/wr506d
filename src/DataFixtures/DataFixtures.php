@@ -15,30 +15,33 @@ use Xylis\FakerCinema\Provider\Movie as MovieProvider;
 class DataFixtures extends Fixture
 {
     private Generator $faker;
+    private Person $personProvider;
+    private MovieProvider $movieProvider;
 
     public function __construct(Generator $faker)
     {
         $this->faker = $faker;
-        $this->faker->addProvider(new Person($this->faker));
-        $this->faker->addProvider(new MovieProvider($this->faker));
+        $this->personProvider = new Person($this->faker);
+        $this->movieProvider = new MovieProvider($this->faker);
+        $this->faker->addProvider($this->personProvider);
+        $this->faker->addProvider($this->movieProvider);
     }
 
     public function load(ObjectManager $manager): void
     {
-        $imageUrl = 'https://placehold.co/600x400';
         $categoriesArray = [];
 
-        $actorsArray = $this->loadActors($manager, $imageUrl);
+        $actorsArray = $this->loadActors($manager);
         $directorsArray = $this->loadDirectors($manager);
-        $this->loadMovies($manager, $actorsArray, $directorsArray, $categoriesArray, $imageUrl);
+        $this->loadMovies($manager, $actorsArray, $directorsArray, $categoriesArray);
 
         $manager->flush();
     }
 
-    private function loadActors(ObjectManager $manager, string $imageUrl): array
+    private function loadActors(ObjectManager $manager): array
     {
         $faker = $this->faker;
-        $actors = $faker->actors($gender = null, $count = 190, $duplicates = false);
+        $actors = $this->personProvider->actors(null, 190, false);
         $actorsArray = [];
 
         foreach ($actors as $item) {
@@ -54,7 +57,7 @@ class DataFixtures extends Fixture
             }
 
             $actor->setBio($faker->paragraph(6));
-            $actor->setPhoto($imageUrl);
+            // Photo requires MediaObject, skip for fixtures
 
             $actorsArray[] = $actor;
             $manager->persist($actor);
@@ -66,7 +69,7 @@ class DataFixtures extends Fixture
     private function loadDirectors(ObjectManager $manager): array
     {
         $faker = $this->faker;
-        $directors = $faker->directors($gender = null, $count = 50, $duplicates = false);
+        $directors = $this->personProvider->directors(null, 50, false);
         $directorsArray = [];
 
         foreach ($directors as $item) {
@@ -92,22 +95,21 @@ class DataFixtures extends Fixture
         ObjectManager $manager,
         array $actorsArray,
         array $directorsArray,
-        array &$categoriesArray,
-        string $imageUrl
+        array &$categoriesArray
     ): void {
         $faker = $this->faker;
-        $movies = $faker->movies($count = 199);
+        $movies = $this->movieProvider->movies(199);
 
         foreach ($movies as $item) {
             $movie = new Movie();
 
             $movie->setName($item);
             $movie->setDescription($faker->paragraph(6));
-            $movie->setImage($imageUrl);
+            // Image requires MediaObject, skip for fixtures
             $movie->setDuration($faker->numberBetween(60 * 60, 270 * 60));
             $movie->setReleaseDate($faker->dateTime());
 
-            $category = $this->getOrCreateCategory($manager, $faker->movieGenre, $categoriesArray);
+            $category = $this->getOrCreateCategory($manager, $this->movieProvider->movieGenre(), $categoriesArray);
 
             shuffle($actorsArray);
             foreach (array_splice($actorsArray, 0, rand(2, 6)) as $actor) {
