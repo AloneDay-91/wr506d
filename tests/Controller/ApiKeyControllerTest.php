@@ -18,7 +18,6 @@ class ApiKeyControllerTest extends ApiTestCase
         parent::setUp();
 
         // Create a test user
-        $client = static::createClient();
         $container = static::getContainer();
         $entityManager = $container->get('doctrine')->getManager();
 
@@ -32,6 +31,7 @@ class ApiKeyControllerTest extends ApiTestCase
         $entityManager->flush();
 
         // Get JWT token for the test user
+        $client = static::createClient();
         $response = $client->request('POST', '/auth', [
             'headers' => ['Content-Type' => 'application/json'],
             'json' => [
