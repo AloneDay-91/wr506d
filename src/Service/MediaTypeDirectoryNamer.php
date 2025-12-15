@@ -24,4 +24,3 @@ class MediaTypeDirectoryNamer implements DirectoryNamerInterface
         };
     }
 }
-

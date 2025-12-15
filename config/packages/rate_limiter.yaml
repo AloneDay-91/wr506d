@@ -4,7 +4,7 @@ framework:
         # Rate limiter for anonymous API users
         anonymous_api:
             policy: 'sliding_window'
-            limit: 3
+            limit: 30
             interval: '1 minute'
 
         # Rate limiter for authenticated API users (default limit)

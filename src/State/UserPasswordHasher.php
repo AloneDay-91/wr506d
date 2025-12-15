@@ -37,4 +37,3 @@ final readonly class UserPasswordHasher implements ProcessorInterface
         return $this->processor->process($data, $operation, $uriVariables, $context);
     }
 }
-
