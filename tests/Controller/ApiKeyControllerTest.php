@@ -4,11 +4,13 @@ namespace App\Tests\Controller;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\User;
-use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
 
 class ApiKeyControllerTest extends ApiTestCase
 {
-    use RefreshDatabaseTrait;
+    /**
+     * @see https://github.com/api-platform/core/issues/6971
+     */
+    public static ?bool $alwaysBootKernel = true;
 
     private string $token;
     private User $testUser;
@@ -17,12 +19,15 @@ class ApiKeyControllerTest extends ApiTestCase
     {
         parent::setUp();
 
-        // Create a test user
+        // Create a test user with a unique email
         $container = static::getContainer();
         $entityManager = $container->get('doctrine')->getManager();
 
+        $uniqueId = uniqid('testuser_', true);
+        $email = $uniqueId . '@example.com';
+
         $this->testUser = new User();
-        $this->testUser->setEmail('testuser@example.com');
+        $this->testUser->setEmail($email);
         $this->testUser->setPassword('$2y$13$hashed_password'); // Dummy hashed password
         $this->testUser->setFirstname('Test');
         $this->testUser->setLastname('User');
@@ -35,7 +40,7 @@ class ApiKeyControllerTest extends ApiTestCase
         $response = $client->request('POST', '/auth', [
             'headers' => ['Content-Type' => 'application/json'],
             'json' => [
-                'email' => 'testuser@example.com',
+                'email' => $email,
                 'password' => 'password', // This won't work in real scenario, but for test structure
             ],
         ]);

@@ -15,18 +15,15 @@ class ApiKeyAuthenticatorTest extends TestCase
 {
     private ApiKeyAuthenticator $authenticator;
     private UserRepository $userRepository;
-    private EntityManagerInterface $entityManager;
     private ApiKeyGenerator $apiKeyGenerator;
 
     protected function setUp(): void
     {
         $this->userRepository = $this->createMock(UserRepository::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->apiKeyGenerator = new ApiKeyGenerator();
 
         $this->authenticator = new ApiKeyAuthenticator(
             $this->userRepository,
-            $this->entityManager,
             $this->apiKeyGenerator
         );
     }
