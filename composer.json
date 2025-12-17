@@ -10,7 +10,7 @@
         "api-platform/doctrine-orm": "^4.1",
         "api-platform/graphql": "^4.1",
         "api-platform/symfony": "^4.1",
-        "cocur/slugify": "^4.6",
+        "cocur/slugify": "^4.7.1",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.16",
         "doctrine/doctrine-migrations-bundle": "^3.4",
@@ -55,6 +55,8 @@
         "twig/twig": "^2.12|^3.0",
         "vich/uploader-bundle": "^2.8",
         "webonyx/graphql-php": "*",
+        "endroid/qr-code": "^5.1",
+        "spomky-labs/otphp": "^11.3",
         "xylis/faker-cinema-providers": "^2.0"
     },
     "config": {
