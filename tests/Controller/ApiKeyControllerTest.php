@@ -7,10 +7,11 @@ use App\Entity\User;
 
 class ApiKeyControllerTest extends ApiTestCase
 {
-    /**
-     * @see https://github.com/api-platform/core/issues/6971
-     */
-    public static ?bool $alwaysBootKernel = true;
+
+    /**                                                                                                                                                                                                                                                                                                                                            │
+│   * @see https://github.com/api-platform/core/issues/6971                                                                                                                                                                                                                                                                                       │
+│   */                                                                                                                                                                                                                                                                                                                                            │
+│   public static ?bool $alwaysBootKernel = true; 
 
     private string $token;
     private User $testUser;
