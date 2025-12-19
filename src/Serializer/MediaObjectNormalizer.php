@@ -39,11 +39,6 @@ class MediaObjectNormalizer implements NormalizerInterface
             return false;
         }
 
-        // Don't use this normalizer for GraphQL to avoid IRI generation issues
-        if (isset($context['graphql_operation_name']) || isset($context['is_collection']) && $format === null) {
-            return false;
-        }
-
         return $data instanceof MediaObject;
     }
 

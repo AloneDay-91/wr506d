@@ -49,7 +49,7 @@ use DateTimeImmutable;
                                     ],
                                     'type' => [
                                         'type' => 'string',
-                                        'enum' => ['profile', 'movie_cover', 'other'],
+                                        'enum' => ['profile', 'movie_cover', 'other', 'actors', 'directors'],
                                         'description' => 'Type of media: profile, movie_cover, or other'
                                     ]
                                 ]
@@ -70,6 +70,8 @@ class MediaObject
 {
     public const TYPE_PROFILE = 'profile';
     public const TYPE_MOVIE_COVER = 'movie_cover';
+    public const TYPE_DIRECTOR = 'director';
+    public const TYPE_ACTOR = 'actor';
     public const TYPE_OTHER = 'other';
 
     #[ORM\Id, ORM\Column, ORM\GeneratedValue]
@@ -92,7 +94,7 @@ class MediaObject
 
     #[ORM\Column(length: 50, options: ['default' => 'other'])]
     #[Groups(['media_object:read', 'media_object:write'])]
-    #[Assert\Choice(choices: ['profile', 'movie_cover', 'other'], message: 'Invalid media type.')]
+    #[Assert\Choice(choices: ['profile', 'movie_cover', 'other', 'actor', 'director'], message: 'Invalid media type.')]
     private string $type = self::TYPE_OTHER;
 
     #[ORM\Column(type: 'datetime_immutable')]

@@ -20,6 +20,8 @@ class MediaTypeDirectoryNamer implements DirectoryNamerInterface
         return match ($object->getType()) {
             MediaObject::TYPE_PROFILE => 'profiles',
             MediaObject::TYPE_MOVIE_COVER => 'movies',
+            MediaObject::TYPE_ACTOR=> 'actor',
+            MediaObject::TYPE_DIRECTOR => 'director',
             default => 'other',
         };
     }
