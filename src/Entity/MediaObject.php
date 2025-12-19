@@ -60,6 +60,10 @@ use DateTimeImmutable;
             )
         ),
         new Delete()
+    ],
+    graphQlOperations: [
+        new \ApiPlatform\Metadata\GraphQl\Query(),
+        new \ApiPlatform\Metadata\GraphQl\QueryCollection()
     ]
 )]
 class MediaObject
@@ -69,10 +73,12 @@ class MediaObject
     public const TYPE_OTHER = 'other';
 
     #[ORM\Id, ORM\Column, ORM\GeneratedValue]
+    #[ApiProperty(identifier: true)]
+    #[Groups(['media_object:read', 'user:read'])]
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'], writable: false)]
-    #[Groups(['media_object:read'])]
+    #[Groups(['media_object:read', 'user:read'])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'media_object', fileNameProperty: 'filePath')]
