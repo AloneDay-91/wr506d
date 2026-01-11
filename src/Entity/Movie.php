@@ -12,6 +12,10 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use App\Repository\MovieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,78 +25,114 @@ use Symfony\Component\Validator\Constraints as Assert;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: MovieRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['movie:list']]
+        ),
+        new Get(
+            normalizationContext: ['groups' => ['movie:read']]
+        ),
+        new Post(
+            security: "is_granted('ROLE_ADMIN')",
+            normalizationContext: ['groups' => ['movie:read']],
+            denormalizationContext: ['groups' => ['movie:write']]
+        ),
+        new Put(
+            security: "is_granted('ROLE_ADMIN') or object.owner == user",
+            normalizationContext: ['groups' => ['movie:read']],
+            denormalizationContext: ['groups' => ['movie:write']]
+        ),
+        new Patch(
+            security: "is_granted('ROLE_ADMIN') or object.owner == user",
+            normalizationContext: ['groups' => ['movie:read']],
+            denormalizationContext: ['groups' => ['movie:write']]
+        ),
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')"
+        )
+    ]
+)]
 #[ORM\HasLifecycleCallbacks]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'partial', 'description' => 'partial', 'image' => 'partial'])]
 #[ApiFilter(DateFilter::class, properties: ['releaseDate'])]
 #[ApiFilter(RangeFilter::class, properties: ['duration'])]
-
-#[Get]
-#[Put(security: "is_granted('ROLE_ADMIN') or object.owner == user")]
-#[GetCollection]
-#[Post(security: "is_granted('ROLE_ADMIN')")]
-#[Delete(security: "is_granted('ROLE_ADMIN')")]
 
 class Movie
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['movie:list', 'movie:read', 'actor:list', 'actor:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Type(type: 'string', message: 'The name must be a string.')]
+    #[Groups(['movie:list', 'movie:read', 'movie:write', 'actor:list', 'actor:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Type(type: 'string', message: 'The description must be a string.')]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
     #[Assert\Type(type: 'integer', message: 'The duration must be an integer.')]
     #[Assert\Range(min: 60, max: 300, notInRangeMessage: 'The duration must be between 60 and 300 minutes.')]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?int $duration = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['movie:list', 'movie:read', 'movie:write'])]
+    #[Context([DateTimeNormalizer::FORMAT_KEY => 'd/m/Y'])]
     private ?\DateTime $releaseDate = null;
 
     #[ORM\Column]
+    #[Groups(['movie:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, Category>
      */
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'movies')]
+    #[Groups(['movie:read', 'movie:write'])]
     private Collection $categories;
 
     /**
      * @var Collection<int, Actor>
      */
     #[ORM\ManyToMany(targetEntity: Actor::class, mappedBy: 'movies')]
+    #[Groups(['movie:read'])]
     private Collection $actors;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?int $nbEntries = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?string $url = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?float $budget = null;
 
     #[ORM\ManyToOne(inversedBy: 'movies')]
     #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotNull]
+    #[Groups(['movie:list', 'movie:read', 'movie:write'])]
     private ?Director $director = null;
 
     #[ORM\ManyToOne(inversedBy: 'movies')]
+    #[Groups(['movie:read', 'movie:write'])]
     private ?MediaObject $image = null;
 
     /**
      * @var Collection<int, Review>
      */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'movie', orphanRemoval: true)]
+    #[Groups(['movie:read'])]
     private Collection $reviews;
 
     public function __construct()
@@ -315,5 +355,30 @@ class Movie
         }
 
         return $this;
+    }
+
+    /**
+     * Durée formatée (virtuel)
+     */
+    #[Groups(['movie:list'])]
+    public function getFormattedDuration(): ?string
+    {
+        if ($this->duration === null) {
+            return null;
+        }
+
+        $hours = intdiv($this->duration, 60);
+        $minutes = $this->duration % 60;
+
+        return sprintf('%dh %dmin', $hours, $minutes);
+    }
+
+    /**
+     * Nombre d'acteurs (virtuel)
+     */
+    #[Groups(['movie:list'])]
+    public function getActorCount(): int
+    {
+        return $this->actors->count();
     }
 }
