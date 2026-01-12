@@ -46,8 +46,6 @@ class UserAuthenticatorService
                 return false;
             }
             $this->logger->info('TOTP code valid');
-        } else {
-            $this->logger->info('2FA not required - bypassing');
         }
 
         $this->logger->info('Credentials verified successfully');

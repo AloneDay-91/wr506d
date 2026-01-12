@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use DateTime;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ActorRepository::class)]
@@ -254,7 +255,7 @@ class Actor
             return null;
         }
         // Si décédé, calcule l'âge au moment du décès
-        $reference = $this->dod ?? new \DateTime();
+        $reference = $this->dod ?? new DateTime();
 
         return $this->dob->diff($reference)->y;
     }

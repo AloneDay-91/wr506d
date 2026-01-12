@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Entity\Embeddable\ApiKeyCredentials;
+use App\Entity\Embeddable\TwoFactorCredentials;
 use App\Repository\UserRepository;
 use App\State\UserPasswordHasher;
 use DateTimeImmutable;
@@ -100,40 +102,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?int $rateLimit = null;
 
-    #[ORM\Column(type: 'string', length: 64, nullable: true, unique: true)]
-    #[Assert\Length(exactly: 64, exactMessage: 'The API key hash must be exactly {{ limit }} characters.')]
-    private ?string $apiKeyHash = null;
-
-    #[ORM\Column(type: 'string', length: 16, nullable: true)]
-    #[Assert\Length(exactly: 16, exactMessage: 'The API key prefix must be exactly {{ limit }} characters.')]
-    #[Groups(['user:read'])]
-    private ?string $apiKeyPrefix = null;
-
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    #[Groups(['user:read'])]
-    private bool $apiKeyEnabled = false;
-
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['user:read'])]
-    private ?\DateTimeImmutable $apiKeyCreatedAt = null;
-
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Groups(['user:read'])]
-    private ?\DateTimeImmutable $apiKeyLastUsedAt = null;
+    #[ORM\Embedded(class: ApiKeyCredentials::class)]
+    private ApiKeyCredentials $apiKey;
 
     #[ORM\ManyToOne(targetEntity: MediaObject::class, inversedBy: 'users')]
     #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?MediaObject $photo = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $twoFactorSecret = null;
-
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    #[Groups(['user:read'])]
-    private bool $twoFactorEnabled = false;
-
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $twoFactorBackupCodes = null;
+    #[ORM\Embedded(class: TwoFactorCredentials::class)]
+    private TwoFactorCredentials $twoFactor;
 
     /**
      * @var Collection<int, Review>
@@ -145,6 +122,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
+        $this->apiKey = new ApiKeyCredentials();
+        $this->twoFactor = new TwoFactorCredentials();
     }
 
     public function getId(): ?int
@@ -320,101 +299,101 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getApiKeyHash(): ?string
     {
-        return $this->apiKeyHash;
+        return $this->apiKey->getHash();
     }
 
     public function setApiKeyHash(?string $apiKeyHash): static
     {
-        $this->apiKeyHash = $apiKeyHash;
+        $this->apiKey->setHash($apiKeyHash);
 
         return $this;
     }
 
     public function getApiKeyPrefix(): ?string
     {
-        return $this->apiKeyPrefix;
+        return $this->apiKey->getPrefix();
     }
 
     public function setApiKeyPrefix(?string $apiKeyPrefix): static
     {
-        $this->apiKeyPrefix = $apiKeyPrefix;
+        $this->apiKey->setPrefix($apiKeyPrefix);
 
         return $this;
     }
 
     public function isApiKeyEnabled(): bool
     {
-        return $this->apiKeyEnabled;
+        return $this->apiKey->isEnabled();
     }
 
     public function setApiKeyEnabled(bool $apiKeyEnabled): static
     {
-        $this->apiKeyEnabled = $apiKeyEnabled;
+        $this->apiKey->setEnabled($apiKeyEnabled);
 
         return $this;
     }
 
     public function getApiKeyCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->apiKeyCreatedAt;
+        return $this->apiKey->getCreatedAt();
     }
 
     public function setApiKeyCreatedAt(?\DateTimeImmutable $apiKeyCreatedAt): static
     {
-        $this->apiKeyCreatedAt = $apiKeyCreatedAt;
+        $this->apiKey->setCreatedAt($apiKeyCreatedAt);
 
         return $this;
     }
 
     public function getApiKeyLastUsedAt(): ?\DateTimeImmutable
     {
-        return $this->apiKeyLastUsedAt;
+        return $this->apiKey->getLastUsedAt();
     }
 
     public function setApiKeyLastUsedAt(?\DateTimeImmutable $apiKeyLastUsedAt): static
     {
-        $this->apiKeyLastUsedAt = $apiKeyLastUsedAt;
+        $this->apiKey->setLastUsedAt($apiKeyLastUsedAt);
 
         return $this;
     }
 
     public function updateApiKeyLastUsedAt(): void
     {
-        $this->apiKeyLastUsedAt = new DateTimeImmutable();
+        $this->apiKey->updateLastUsedAt();
     }
 
     public function getTwoFactorSecret(): ?string
     {
-        return $this->twoFactorSecret;
+        return $this->twoFactor->getSecret();
     }
 
     public function setTwoFactorSecret(?string $twoFactorSecret): static
     {
-        $this->twoFactorSecret = $twoFactorSecret;
+        $this->twoFactor->setSecret($twoFactorSecret);
 
         return $this;
     }
 
     public function isTwoFactorEnabled(): bool
     {
-        return $this->twoFactorEnabled;
+        return $this->twoFactor->isEnabled();
     }
 
     public function setTwoFactorEnabled(bool $twoFactorEnabled): static
     {
-        $this->twoFactorEnabled = $twoFactorEnabled;
+        $this->twoFactor->setEnabled($twoFactorEnabled);
 
         return $this;
     }
 
     public function getTwoFactorBackupCodes(): ?array
     {
-        return $this->twoFactorBackupCodes;
+        return $this->twoFactor->getBackupCodes();
     }
 
     public function setTwoFactorBackupCodes(?array $twoFactorBackupCodes): static
     {
-        $this->twoFactorBackupCodes = $twoFactorBackupCodes;
+        $this->twoFactor->setBackupCodes($twoFactorBackupCodes);
 
         return $this;
     }
