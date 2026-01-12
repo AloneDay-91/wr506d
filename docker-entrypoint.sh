@@ -26,11 +26,19 @@ fi
 
 # Compiler les assets avec AssetMapper
 echo "🔨 Compiling assets with AssetMapper..."
-php bin/console asset-mapper:compile --env=prod 2>/dev/null || echo "⚠️  AssetMapper compilation skipped (not critical)"
+if php bin/console asset-map:compile --env=prod 2>&1; then
+    echo "✅ AssetMapper compilation successful"
+else
+    echo "⚠️  AssetMapper compilation failed (not critical for API Platform)"
+fi
 
 # Installer importmap
 echo "📥 Installing importmap..."
-php bin/console importmap:install --env=prod 2>/dev/null || echo "⚠️  Importmap install skipped (not critical)"
+if php bin/console importmap:install --env=prod 2>&1; then
+    echo "✅ Importmap installed"
+else
+    echo "⚠️  Importmap install failed (not critical)"
+fi
 
 # Vérifier que les assets sont bien là
 if [ -d "public/bundles/apiplatform" ]; then
