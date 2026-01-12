@@ -12,9 +12,7 @@ class TotpFactory
      */
     public function create(): TOTPInterface
     {
-        $totp = TOTP::generate();
-        $totp->setRfc3548Compliant(true);
-        return $totp;
+        return TOTP::generate();
     }
 
     /**
