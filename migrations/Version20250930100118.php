@@ -20,7 +20,7 @@ final class Version20250930100118 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE director (id INT AUTO_INCREMENT NULL, lastname VARCHAR(255) NOT NULL, firstname VARCHAR(255) NOT NULL, dob DATETIME NOT NULL, dod DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE director (id INT AUTO_INCREMENT NOT NULL, lastname VARCHAR(255) NOT NULL, firstname VARCHAR(255) NOT NULL, dob DATETIME NOT NULL, dod DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE movie ADD director_id INT NULL, ADD nb_entries INT DEFAULT NULL, ADD url VARCHAR(255) DEFAULT NULL, ADD budget DOUBLE PRECISION DEFAULT NULL');
         $this->addSql('ALTER TABLE movie ADD CONSTRAINT FK_1D5EF26F899FB366 FOREIGN KEY (director_id) REFERENCES director (id)');
         $this->addSql('CREATE INDEX IDX_1D5EF26F899FB366 ON movie (director_id)');
