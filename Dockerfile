@@ -48,6 +48,10 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # Copier tout le code source
 COPY . .
 
+# Copier le script d'entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Variables d'environnement pour la production
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
@@ -55,11 +59,7 @@ ENV APP_DEBUG=0
 # Finaliser l'installation Composer avec les scripts
 RUN composer dump-autoload --optimize --classmap-authoritative
 
-# Installer les assets
-RUN php bin/console assets:install public --no-interaction || true
-
 # Créer les dossiers nécessaires et définir les permissions
-# Ne pas générer le cache ici, il sera généré au premier accès avec www-data
 RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles && \
     chown -R www-data:www-data var/ public/uploads public/bundles && \
     chmod -R 777 var/cache var/log var/sessions && \
@@ -68,5 +68,5 @@ RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles &
 # Exposer le port 80
 EXPOSE 80
 
-# Démarrer Apache en foreground
-CMD ["apache2-foreground"]
+# Utiliser le script d'entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
