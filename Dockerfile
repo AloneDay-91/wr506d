@@ -26,6 +26,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copier et activer la configuration Apache personnalisée
 COPY docker-apache.conf /etc/apache2/sites-available/000-default.conf
 
+# Supprimer le warning ServerName
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 # Configuration PHP pour production
 RUN { \
     echo 'opcache.enable=1'; \
@@ -60,10 +63,10 @@ ENV APP_DEBUG=0
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Créer les dossiers nécessaires et définir les permissions
-RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles && \
-    chown -R www-data:www-data var/ public/uploads public/bundles && \
+RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles public/assets && \
+    chown -R www-data:www-data var/ public/uploads public/bundles public/assets && \
     chmod -R 777 var/cache var/log var/sessions && \
-    chmod -R 775 public/uploads public/bundles
+    chmod -R 775 public/uploads public/bundles public/assets
 
 # Exposer le port 80
 EXPOSE 80
