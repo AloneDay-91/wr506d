@@ -53,6 +53,9 @@ class Director
     #[ORM\OneToMany(targetEntity: Movie::class, mappedBy: 'director', orphanRemoval: true)]
     private Collection $movies;
 
+    #[ORM\ManyToOne(targetEntity: MediaObject::class, inversedBy: 'directors')]
+    private ?MediaObject $photo = null;
+
     public function __construct()
     {
         $this->movies = new ArrayCollection();
@@ -137,6 +140,18 @@ class Director
                 $movie->setDirector(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPhoto(): ?MediaObject
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?MediaObject $photo): static
+    {
+        $this->photo = $photo;
 
         return $this;
     }

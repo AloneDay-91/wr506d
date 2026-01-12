@@ -18,15 +18,13 @@ security:
             pattern: ^/api/
             stateless: true
             jwt: ~
+            custom_authenticators:
+                - App\Security\ApiKeyAuthenticator
         main:
             lazy: true
             provider: app_user_provider
-            json_login:
-                check_path: /auth
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            custom_authenticators:
+                - App\Security\CustomAuthenticator
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -40,6 +38,8 @@ security:
         #- { path: ^/auth, roles: PUBLIC_ACCESS }
         #- { path: ^/, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/docs, roles: PUBLIC_ACCESS } # Allows accessing API documentations and Swagger UI docs
+        - { path: ^/api/graphql, roles: PUBLIC_ACCESS } # Allows accessing GraphQL endpoint
+        - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: [POST] } # Allows user registration
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
