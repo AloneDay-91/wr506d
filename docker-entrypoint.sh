@@ -3,6 +3,28 @@ set -e
 
 echo "🚀 Starting application setup..."
 
+# Générer les clés JWT si elles n'existent pas
+if [ ! -f "config/jwt/private.pem" ]; then
+    echo "🔑 Generating JWT keys..."
+    mkdir -p config/jwt
+
+    # Générer la passphrase depuis la variable d'environnement ou utiliser celle par défaut
+    JWT_PASS="${JWT_PASSPHRASE}"
+
+    # Générer la clé privée
+    openssl genpkey -algorithm RSA -out config/jwt/private.pem -aes256 -pass pass:"$JWT_PASS" -pkeyopt rsa_keygen_bits:4096
+
+    # Générer la clé publique
+    openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem -passin pass:"$JWT_PASS"
+
+    # Définir les permissions
+    chmod 644 config/jwt/private.pem config/jwt/public.pem
+
+    echo "✅ JWT keys generated successfully"
+else
+    echo "✅ JWT keys already exist"
+fi
+
 # Attendre que la base de données soit prête (optionnel mais recommandé)
 echo "⏳ Waiting for database..."
 timeout=60
