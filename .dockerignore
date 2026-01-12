@@ -1,0 +1,45 @@
+# Git
+.git
+.github
+.gitignore
+
+# IDE
+.idea
+.vscode
+
+# Tests et dev
+tests/
+phpunit.dist.xml
+.phpunit.cache
+
+# Documentation
+README.md
+docs/
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Env files (on les recrée dans le Dockerfile)
+.env.local
+.env.*.local
+
+# Cache et logs (seront recréés)
+var/cache/
+var/log/
+var/sessions/
+
+# Vendor (sera installé via composer)
+vendor/
+
+# Node modules (si présent)
+node_modules/
+
+# DS_Store
+.DS_Store
+
+# Fichiers de dev
+compose.yaml
+compose.override.yaml
+.editorconfig
