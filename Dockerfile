@@ -56,9 +56,10 @@ ENV APP_DEBUG=0
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Créer les dossiers nécessaires et définir les permissions
-RUN mkdir -p var/cache var/log var/sessions public/uploads && \
+RUN mkdir -p var/cache/prod var/log var/sessions public/uploads && \
     chown -R www-data:www-data var/ public/uploads && \
-    chmod -R 775 var/ public/uploads
+    chmod -R 777 var/cache var/log var/sessions && \
+    chmod -R 775 public/uploads
 
 # Exposer le port 80
 EXPOSE 80
