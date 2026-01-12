@@ -55,11 +55,15 @@ ENV APP_DEBUG=0
 # Finaliser l'installation Composer avec les scripts
 RUN composer dump-autoload --optimize --classmap-authoritative
 
+# Installer les assets
+RUN php bin/console assets:install public --no-interaction || true
+
 # Créer les dossiers nécessaires et définir les permissions
-RUN mkdir -p var/cache/prod var/log var/sessions public/uploads && \
-    chown -R www-data:www-data var/ public/uploads && \
+# Ne pas générer le cache ici, il sera généré au premier accès avec www-data
+RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles && \
+    chown -R www-data:www-data var/ public/uploads public/bundles && \
     chmod -R 777 var/cache var/log var/sessions && \
-    chmod -R 775 public/uploads
+    chmod -R 775 public/uploads public/bundles
 
 # Exposer le port 80
 EXPOSE 80
