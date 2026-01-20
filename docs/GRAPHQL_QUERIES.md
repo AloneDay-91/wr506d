@@ -1,6 +1,6 @@
-# Documentation des requêtes GraphQL
+# Documentation des requêtes GraphQL et REST API
 
-Ce document contient toutes les requêtes GraphQL CRUD pour les entités de l'application WR506D.
+Ce document contient toutes les requêtes GraphQL et REST CRUD pour les entités de l'application Movies WR506D par Elouan Bruzek.
 
 ## Table des matières
 
@@ -16,16 +16,89 @@ Ce document contient toutes les requêtes GraphQL CRUD pour les entités de l'ap
 
 ## Actors
 
-### GetAll - Liste de tous les acteurs
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/actors` | Liste tous les acteurs | Public |
+| GET | `/api/actors/{id}` | Récupère un acteur | Public |
+| POST | `/api/actors` | Crée un acteur | ROLE_ADMIN |
+| PUT | `/api/actors/{id}` | Remplace un acteur | ROLE_ADMIN ou propriétaire |
+| PATCH | `/api/actors/{id}` | Modifie un acteur | ROLE_ADMIN ou propriétaire |
+| DELETE | `/api/actors/{id}` | Supprime un acteur | ROLE_ADMIN |
+
+**Filtres disponibles:**
+- `lastname` (start) - Recherche par début du nom
+- `firstname` (start) - Recherche par début du prénom
+- `bio` (partial) - Recherche dans la biographie
+- `dob[before]`, `dob[after]` - Filtrer par date de naissance
+- `dod[before]`, `dod[after]` - Filtrer par date de décès
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/actors
+GET {{base_url}}/api/actors/1
+GET {{base_url}}/api/actors?lastname=Di
+```
+
+```
+POST {{base_url}}/api/actors
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "lastname": "DiCaprio",
+  "firstname": "Leonardo",
+  "dob": "1974-11-11",
+  "bio": "American actor and film producer.",
+  "photo": "/api/media_objects/1",
+  "movies": ["/api/movies/1", "/api/movies/2"]
+}
+```
+
+```
+PUT {{base_url}}/api/actors/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "lastname": "DiCaprio",
+  "firstname": "Leonardo Wilhelm",
+  "dob": "1974-11-11",
+  "bio": "American actor, film producer, and environmentalist."
+}
+```
+
+```
+PATCH {{base_url}}/api/actors/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/merge-patch+json
+Body (raw JSON):
+{
+  "bio": "Updated biography"
+}
+```
+
+```
+DELETE {{base_url}}/api/actors/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les acteurs
 
 ```graphql
 query GetAllActors {
   actors {
-    totalCount
     edges {
       node {
         id
-
         lastname
         firstname
         dob
@@ -33,7 +106,6 @@ query GetAllActors {
         bio
         photo {
           id
-  
           contentUrl
           type
         }
@@ -41,7 +113,6 @@ query GetAllActors {
           edges {
             node {
               id
-      
               name
             }
           }
@@ -49,56 +120,11 @@ query GetAllActors {
         createdAt
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination
-
-```graphql
-query GetAllActorsPaginated($first: Int, $after: String) {
-  actors(first: $first, after: $after) {
-    totalCount
-    edges {
-      node {
-        id
-
-        lastname
-        firstname
-        dob
-        dod
-        bio
-        photo {
-          id
-  
-          contentUrl
-        }
-        createdAt
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": "cursor_value"
-}
-```
-
-### GetById - Récupérer un acteur par ID
+#### GetById - Récupérer un acteur par ID
 
 ```graphql
 query GetActorById($id: ID!) {
@@ -120,7 +146,6 @@ query GetActorById($id: ID!) {
       edges {
         node {
           id
-  
           name
           description
           releaseDate
@@ -139,7 +164,7 @@ query GetActorById($id: ID!) {
 }
 ```
 
-### Create - Créer un acteur
+#### Create - Créer un acteur
 
 ```graphql
 mutation CreateActor($lastname: String!, $firstname: String, $dob: String, $dod: String, $bio: String, $photo: String, $movies: [String]) {
@@ -162,7 +187,6 @@ mutation CreateActor($lastname: String!, $firstname: String, $dob: String, $dod:
       bio
       photo {
         id
-
         contentUrl
       }
       createdAt
@@ -184,7 +208,7 @@ mutation CreateActor($lastname: String!, $firstname: String, $dob: String, $dod:
 }
 ```
 
-### Update - Mettre à jour un acteur
+#### Update - Mettre à jour un acteur
 
 ```graphql
 mutation UpdateActor($id: ID!, $lastname: String, $firstname: String, $dob: String, $dod: String, $bio: String, $photo: String, $movies: [String]) {
@@ -208,7 +232,6 @@ mutation UpdateActor($id: ID!, $lastname: String, $firstname: String, $dob: Stri
       bio
       photo {
         id
-
         contentUrl
       }
       createdAt
@@ -227,7 +250,7 @@ mutation UpdateActor($id: ID!, $lastname: String, $firstname: String, $dob: Stri
 }
 ```
 
-### Delete - Supprimer un acteur
+#### Delete - Supprimer un acteur
 
 ```graphql
 mutation DeleteActor($id: ID!) {
@@ -251,16 +274,95 @@ mutation DeleteActor($id: ID!) {
 
 ## Movies
 
-### GetAll - Liste de tous les films
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/movies` | Liste tous les films | Public |
+| GET | `/api/movies/{id}` | Récupère un film | Public |
+| POST | `/api/movies` | Crée un film | ROLE_ADMIN |
+| PUT | `/api/movies/{id}` | Remplace un film | ROLE_ADMIN ou propriétaire |
+| PATCH | `/api/movies/{id}` | Modifie un film | ROLE_ADMIN ou propriétaire |
+| DELETE | `/api/movies/{id}` | Supprime un film | ROLE_ADMIN |
+
+**Filtres disponibles:**
+- `name` (partial) - Recherche par nom
+- `description` (partial) - Recherche dans la description
+- `releaseDate[before]`, `releaseDate[after]` - Filtrer par date de sortie
+- `duration[gte]`, `duration[lte]` - Filtrer par durée
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/movies
+GET {{base_url}}/api/movies/1
+GET {{base_url}}/api/movies?name=Inception
+GET {{base_url}}/api/movies?duration[gte]=120&duration[lte]=180
+GET {{base_url}}/api/movies?releaseDate[after]=2010-01-01
+```
+
+```
+POST {{base_url}}/api/movies
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "name": "Inception",
+  "description": "A thief who steals corporate secrets through dream-sharing technology.",
+  "duration": 148,
+  "releaseDate": "2010-07-16",
+  "nbEntries": 836836967,
+  "url": "https://www.imdb.com/title/tt1375666/",
+  "budget": 160000000,
+  "director": "/api/directors/1",
+  "image": "/api/media_objects/1",
+  "actors": ["/api/actors/1", "/api/actors/2"],
+  "categories": ["/api/categories/1"]
+}
+```
+
+```
+PUT {{base_url}}/api/movies/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "name": "Inception (Updated)",
+  "description": "Updated description",
+  "duration": 148,
+  "director": "/api/directors/1"
+}
+```
+
+```
+PATCH {{base_url}}/api/movies/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/merge-patch+json
+Body (raw JSON):
+{
+  "description": "New description"
+}
+```
+
+```
+DELETE {{base_url}}/api/movies/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les films
 
 ```graphql
 query GetAllMovies {
   movies {
-    totalCount
     edges {
       node {
         id
-
         name
         description
         duration
@@ -270,13 +372,11 @@ query GetAllMovies {
         budget
         image {
           id
-  
           contentUrl
           type
         }
         director {
           id
-  
           firstname
           lastname
         }
@@ -284,7 +384,6 @@ query GetAllMovies {
           edges {
             node {
               id
-      
               firstname
               lastname
             }
@@ -294,7 +393,6 @@ query GetAllMovies {
           edges {
             node {
               id
-      
               name
             }
           }
@@ -303,7 +401,6 @@ query GetAllMovies {
           edges {
             node {
               id
-      
               title
               rating
             }
@@ -312,62 +409,11 @@ query GetAllMovies {
         createdAt
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination et filtres
-
-```graphql
-query GetAllMoviesPaginated($first: Int, $after: String, $name: String) {
-  movies(first: $first, after: $after, name: $name) {
-    totalCount
-    edges {
-      node {
-        id
-
-        name
-        description
-        duration
-        releaseDate
-        image {
-          id
-  
-          contentUrl
-        }
-        director {
-          id
-  
-          firstname
-          lastname
-        }
-        createdAt
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null,
-  "name": "Inception"
-}
-```
-
-### GetById - Récupérer un film par ID
+#### GetById - Récupérer un film par ID
 
 ```graphql
 query GetMovieById($id: ID!) {
@@ -398,12 +444,10 @@ query GetMovieById($id: ID!) {
       edges {
         node {
           id
-  
           firstname
           lastname
           photo {
             id
-    
             contentUrl
           }
         }
@@ -413,7 +457,6 @@ query GetMovieById($id: ID!) {
       edges {
         node {
           id
-  
           name
         }
       }
@@ -422,13 +465,11 @@ query GetMovieById($id: ID!) {
       edges {
         node {
           id
-  
           title
           comment
           rating
           user {
             id
-    
             firstname
             lastname
           }
@@ -448,7 +489,7 @@ query GetMovieById($id: ID!) {
 }
 ```
 
-### Create - Créer un film
+#### Create - Créer un film
 
 ```graphql
 mutation CreateMovie($name: String!, $description: String, $duration: Int, $releaseDate: String, $nbEntries: Int, $url: String, $budget: Float, $director: String!, $image: String, $actors: [String], $categories: [String]) {
@@ -477,12 +518,10 @@ mutation CreateMovie($name: String!, $description: String, $duration: Int, $rele
       budget
       image {
         id
-
         contentUrl
       }
       director {
         id
-
         firstname
         lastname
       }
@@ -509,7 +548,7 @@ mutation CreateMovie($name: String!, $description: String, $duration: Int, $rele
 }
 ```
 
-### Update - Mettre à jour un film
+#### Update - Mettre à jour un film
 
 ```graphql
 mutation UpdateMovie($id: ID!, $name: String, $description: String, $duration: Int, $releaseDate: String, $nbEntries: Int, $url: String, $budget: Float, $director: String, $image: String, $actors: [String], $categories: [String]) {
@@ -539,12 +578,10 @@ mutation UpdateMovie($id: ID!, $name: String, $description: String, $duration: I
       budget
       image {
         id
-
         contentUrl
       }
       director {
         id
-
         firstname
         lastname
       }
@@ -563,7 +600,7 @@ mutation UpdateMovie($id: ID!, $name: String, $description: String, $duration: I
 }
 ```
 
-### Delete - Supprimer un film
+#### Delete - Supprimer un film
 
 ```graphql
 mutation DeleteMovie($id: ID!) {
@@ -587,23 +624,72 @@ mutation DeleteMovie($id: ID!) {
 
 ## Directors
 
-### GetAll - Liste de tous les réalisateurs
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/directors` | Liste tous les réalisateurs | Public |
+| GET | `/api/directors/{id}` | Récupère un réalisateur | Public |
+| POST | `/api/directors` | Crée un réalisateur | ROLE_ADMIN |
+| PUT | `/api/directors/{id}` | Remplace un réalisateur | ROLE_ADMIN ou propriétaire |
+| DELETE | `/api/directors/{id}` | Supprime un réalisateur | ROLE_ADMIN |
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/directors
+GET {{base_url}}/api/directors/1
+```
+
+```
+POST {{base_url}}/api/directors
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "lastname": "Nolan",
+  "firstname": "Christopher",
+  "dob": "1970-07-30",
+  "photo": "/api/media_objects/1"
+}
+```
+
+```
+PUT {{base_url}}/api/directors/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "lastname": "Nolan",
+  "firstname": "Christopher Edward",
+  "dob": "1970-07-30"
+}
+```
+
+```
+DELETE {{base_url}}/api/directors/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les réalisateurs
 
 ```graphql
 query GetAllDirectors {
   directors {
-    totalCount
     edges {
       node {
         id
-
         lastname
         firstname
         dob
         dod
         photo {
           id
-  
           contentUrl
           type
         }
@@ -611,61 +697,17 @@ query GetAllDirectors {
           edges {
             node {
               id
-      
               name
             }
           }
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination
-
-```graphql
-query GetAllDirectorsPaginated($first: Int, $after: String) {
-  directors(first: $first, after: $after) {
-    totalCount
-    edges {
-      node {
-        id
-
-        lastname
-        firstname
-        dob
-        dod
-        photo {
-          id
-  
-          contentUrl
-        }
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null
-}
-```
-
-### GetById - Récupérer un réalisateur par ID
+#### GetById - Récupérer un réalisateur par ID
 
 ```graphql
 query GetDirectorById($id: ID!) {
@@ -686,7 +728,6 @@ query GetDirectorById($id: ID!) {
       edges {
         node {
           id
-  
           name
           description
           releaseDate
@@ -705,7 +746,7 @@ query GetDirectorById($id: ID!) {
 }
 ```
 
-### Create - Créer un réalisateur
+#### Create - Créer un réalisateur
 
 ```graphql
 mutation CreateDirector($lastname: String!, $firstname: String!, $dob: String!, $dod: String, $photo: String) {
@@ -725,7 +766,6 @@ mutation CreateDirector($lastname: String!, $firstname: String!, $dob: String!, 
       dod
       photo {
         id
-
         contentUrl
       }
     }
@@ -744,7 +784,7 @@ mutation CreateDirector($lastname: String!, $firstname: String!, $dob: String!, 
 }
 ```
 
-### Update - Mettre à jour un réalisateur
+#### Update - Mettre à jour un réalisateur
 
 ```graphql
 mutation UpdateDirector($id: ID!, $lastname: String, $firstname: String, $dob: String, $dod: String, $photo: String) {
@@ -765,7 +805,6 @@ mutation UpdateDirector($id: ID!, $lastname: String, $firstname: String, $dob: S
       dod
       photo {
         id
-
         contentUrl
       }
     }
@@ -782,7 +821,7 @@ mutation UpdateDirector($id: ID!, $lastname: String, $firstname: String, $dob: S
 }
 ```
 
-### Delete - Supprimer un réalisateur
+#### Delete - Supprimer un réalisateur
 
 ```graphql
 mutation DeleteDirector($id: ID!) {
@@ -806,22 +845,71 @@ mutation DeleteDirector($id: ID!) {
 
 ## Categories
 
-### GetAll - Liste de toutes les catégories
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/categories` | Liste toutes les catégories | Public |
+| GET | `/api/categories/{id}` | Récupère une catégorie | Public |
+| POST | `/api/categories` | Crée une catégorie | ROLE_ADMIN |
+| PUT | `/api/categories/{id}` | Remplace une catégorie | ROLE_ADMIN ou propriétaire |
+| DELETE | `/api/categories/{id}` | Supprime une catégorie | ROLE_ADMIN |
+
+**Filtres disponibles:**
+- `name` (partial) - Recherche par nom
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/categories
+GET {{base_url}}/api/categories/1
+GET {{base_url}}/api/categories?name=Action
+```
+
+```
+POST {{base_url}}/api/categories
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "name": "Science Fiction",
+  "movies": ["/api/movies/1", "/api/movies/2"]
+}
+```
+
+```
+PUT {{base_url}}/api/categories/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "name": "Sci-Fi"
+}
+```
+
+```
+DELETE {{base_url}}/api/categories/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de toutes les catégories
 
 ```graphql
 query GetAllCategories {
   categories {
-    totalCount
     edges {
       node {
         id
-
         name
         movies {
           edges {
             node {
               id
-      
               name
             }
           }
@@ -829,48 +917,11 @@ query GetAllCategories {
         createdAt
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination et filtre
-
-```graphql
-query GetAllCategoriesPaginated($first: Int, $after: String, $name: String) {
-  categories(first: $first, after: $after, name: $name) {
-    totalCount
-    edges {
-      node {
-        id
-
-        name
-        createdAt
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null,
-  "name": "Action"
-}
-```
-
-### GetById - Récupérer une catégorie par ID
+#### GetById - Récupérer une catégorie par ID
 
 ```graphql
 query GetCategoryById($id: ID!) {
@@ -882,7 +933,6 @@ query GetCategoryById($id: ID!) {
       edges {
         node {
           id
-  
           name
           description
           releaseDate
@@ -901,7 +951,7 @@ query GetCategoryById($id: ID!) {
 }
 ```
 
-### Create - Créer une catégorie
+#### Create - Créer une catégorie
 
 ```graphql
 mutation CreateCategory($name: String!, $movies: [String]) {
@@ -927,7 +977,7 @@ mutation CreateCategory($name: String!, $movies: [String]) {
 }
 ```
 
-### Update - Mettre à jour une catégorie
+#### Update - Mettre à jour une catégorie
 
 ```graphql
 mutation UpdateCategory($id: ID!, $name: String, $movies: [String]) {
@@ -954,7 +1004,7 @@ mutation UpdateCategory($id: ID!, $name: String, $movies: [String]) {
 }
 ```
 
-### Delete - Supprimer une catégorie
+#### Delete - Supprimer une catégorie
 
 ```graphql
 mutation DeleteCategory($id: ID!) {
@@ -978,91 +1028,95 @@ mutation DeleteCategory($id: ID!) {
 
 ## Reviews
 
-### GetAll - Liste de tous les avis
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/reviews` | Liste tous les avis | Public |
+| GET | `/api/reviews/{id}` | Récupère un avis | Public |
+| POST | `/api/reviews` | Crée un avis | ROLE_USER |
+| PUT | `/api/reviews/{id}` | Remplace un avis | ROLE_ADMIN ou propriétaire |
+| PATCH | `/api/reviews/{id}` | Modifie un avis | ROLE_ADMIN ou propriétaire |
+| DELETE | `/api/reviews/{id}` | Supprime un avis | ROLE_ADMIN ou propriétaire |
+
+**Filtres disponibles:**
+- `title` (partial) - Recherche par titre
+- `comment` (partial) - Recherche dans le commentaire
+- `rating[gte]`, `rating[lte]` - Filtrer par note (1-5)
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/reviews
+GET {{base_url}}/api/reviews/1
+GET {{base_url}}/api/reviews?rating[gte]=4
+GET {{base_url}}/api/reviews?title=Amazing
+```
+
+```
+POST {{base_url}}/api/reviews
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "title": "Amazing movie!",
+  "comment": "This movie blew my mind.",
+  "rating": 5,
+  "user": "/api/users/1",
+  "movie": "/api/movies/1"
+}
+```
+
+```
+PATCH {{base_url}}/api/reviews/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/merge-patch+json
+Body (raw JSON):
+{
+  "rating": 4,
+  "comment": "Updated comment"
+}
+```
+
+```
+DELETE {{base_url}}/api/reviews/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les avis
 
 ```graphql
 query GetAllReviews {
   reviews {
-    totalCount
     edges {
       node {
         id
-
         title
         comment
         rating
         user {
           id
-  
           firstname
           lastname
         }
         movie {
           id
-  
           name
         }
         createdAt
         updatedAt
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination et filtres
-
-```graphql
-query GetAllReviewsPaginated($first: Int, $after: String, $title: String, $rating_gte: Int, $rating_lte: Int) {
-  reviews(first: $first, after: $after, title: $title, rating: { gte: $rating_gte, lte: $rating_lte }) {
-    totalCount
-    edges {
-      node {
-        id
-
-        title
-        comment
-        rating
-        user {
-          id
-  
-          firstname
-          lastname
-        }
-        movie {
-          id
-  
-          name
-        }
-        createdAt
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null,
-  "title": "Great",
-  "rating_gte": 4,
-  "rating_lte": 5
-}
-```
-
-### GetById - Récupérer un avis par ID
+#### GetById - Récupérer un avis par ID
 
 ```graphql
 query GetReviewById($id: ID!) {
@@ -1098,7 +1152,7 @@ query GetReviewById($id: ID!) {
 }
 ```
 
-### Create - Créer un avis
+#### Create - Créer un avis
 
 ```graphql
 mutation CreateReview($title: String!, $comment: String!, $rating: Int!, $user: String!, $movie: String!) {
@@ -1117,13 +1171,11 @@ mutation CreateReview($title: String!, $comment: String!, $rating: Int!, $user: 
       rating
       user {
         id
-
         firstname
         lastname
       }
       movie {
         id
-
         name
       }
       createdAt
@@ -1143,7 +1195,7 @@ mutation CreateReview($title: String!, $comment: String!, $rating: Int!, $user: 
 }
 ```
 
-### Update - Mettre à jour un avis
+#### Update - Mettre à jour un avis
 
 ```graphql
 mutation UpdateReview($id: ID!, $title: String, $comment: String, $rating: Int) {
@@ -1175,7 +1227,7 @@ mutation UpdateReview($id: ID!, $title: String, $comment: String, $rating: Int) 
 }
 ```
 
-### Delete - Supprimer un avis
+#### Delete - Supprimer un avis
 
 ```graphql
 mutation DeleteReview($id: ID!) {
@@ -1201,23 +1253,78 @@ mutation DeleteReview($id: ID!) {
 
 > **Note :** Les requêtes User nécessitent généralement un rôle `ROLE_ADMIN` sauf pour la création et la modification de son propre compte.
 
-### GetAll - Liste de tous les utilisateurs (Admin)
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/users` | Liste tous les utilisateurs | ROLE_ADMIN |
+| GET | `/api/users/{id}` | Récupère un utilisateur | ROLE_ADMIN |
+| POST | `/api/users` | Crée un utilisateur | Public |
+| PUT | `/api/users/{id}` | Remplace un utilisateur | ROLE_USER ou ROLE_ADMIN |
+| PATCH | `/api/users/{id}` | Modifie un utilisateur | ROLE_USER ou ROLE_ADMIN |
+| DELETE | `/api/users/{id}` | Supprime un utilisateur | ROLE_ADMIN |
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/users
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+```
+GET {{base_url}}/api/users/1
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+```
+POST {{base_url}}/api/users
+Headers:
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "email": "john.doe@example.com",
+  "plainPassword": "SecurePassword123!",
+  "firstname": "John",
+  "lastname": "Doe"
+}
+```
+
+```
+PATCH {{base_url}}/api/users/1
+Headers:
+  Authorization: Bearer {{token}}
+  Content-Type: application/merge-patch+json
+Body (raw JSON):
+{
+  "firstname": "Johnny",
+  "lastname": "Doe Updated"
+}
+```
+
+```
+DELETE {{base_url}}/api/users/1
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les utilisateurs (Admin)
 
 ```graphql
 query GetAllUsers {
   users {
-    totalCount
     edges {
       node {
         id
-
         email
         roles
         firstname
         lastname
         photo {
           id
-  
           contentUrl
         }
         twoFactorEnabled
@@ -1227,7 +1334,6 @@ query GetAllUsers {
           edges {
             node {
               id
-      
               title
               rating
             }
@@ -1235,55 +1341,11 @@ query GetAllUsers {
         }
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination (Admin)
-
-```graphql
-query GetAllUsersPaginated($first: Int, $after: String) {
-  users(first: $first, after: $after) {
-    totalCount
-    edges {
-      node {
-        id
-
-        email
-        roles
-        firstname
-        lastname
-        photo {
-          id
-  
-          contentUrl
-        }
-        twoFactorEnabled
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null
-}
-```
-
-### GetById - Récupérer un utilisateur par ID (Admin)
+#### GetById - Récupérer un utilisateur par ID (Admin)
 
 ```graphql
 query GetUserById($id: ID!) {
@@ -1310,13 +1372,11 @@ query GetUserById($id: ID!) {
       edges {
         node {
           id
-  
           title
           comment
           rating
           movie {
             id
-    
             name
           }
           createdAt
@@ -1334,7 +1394,7 @@ query GetUserById($id: ID!) {
 }
 ```
 
-### Create - Créer un utilisateur (Public)
+#### Create - Créer un utilisateur (Public)
 
 ```graphql
 mutation CreateUser($email: String!, $plainPassword: String!, $firstname: String!, $lastname: String!, $roles: Iterable, $photo: String) {
@@ -1355,7 +1415,6 @@ mutation CreateUser($email: String!, $plainPassword: String!, $firstname: String
       lastname
       photo {
         id
-
         contentUrl
       }
     }
@@ -1375,7 +1434,7 @@ mutation CreateUser($email: String!, $plainPassword: String!, $firstname: String
 }
 ```
 
-### Update - Mettre à jour un utilisateur
+#### Update - Mettre à jour un utilisateur
 
 ```graphql
 mutation UpdateUser($id: ID!, $email: String, $plainPassword: String, $firstname: String, $lastname: String, $roles: Iterable, $photo: String) {
@@ -1397,7 +1456,6 @@ mutation UpdateUser($id: ID!, $email: String, $plainPassword: String, $firstname
       lastname
       photo {
         id
-
         contentUrl
       }
     }
@@ -1414,7 +1472,7 @@ mutation UpdateUser($id: ID!, $email: String, $plainPassword: String, $firstname
 }
 ```
 
-### Delete - Supprimer un utilisateur (Admin)
+#### Delete - Supprimer un utilisateur (Admin)
 
 ```graphql
 mutation DeleteUser($id: ID!) {
@@ -1440,66 +1498,69 @@ mutation DeleteUser($id: ID!) {
 
 > **Note :** Les MediaObjects sont uploadés via REST API (multipart/form-data). GraphQL est utilisé principalement pour la lecture et la suppression.
 
-### GetAll - Liste de tous les médias
+### REST API
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/api/media_objects` | Liste tous les médias | Public |
+| GET | `/api/media_objects/{id}` | Récupère un média | Public |
+| POST | `/api/media_objects` | Upload un média | Public |
+| DELETE | `/api/media_objects/{id}` | Supprime un média | Public |
+
+**Filtres disponibles:**
+- `type` (exact) - Filtrer par type de média
+
+**Types de médias:**
+- `profile` - Photos de profil
+- `movie_cover` - Couvertures de films
+- `actor` - Photos d'acteurs
+- `director` - Photos de réalisateurs
+- `other` - Autres types
+
+**Exemples Postman:**
+
+```
+GET {{base_url}}/api/media_objects
+GET {{base_url}}/api/media_objects/1
+GET {{base_url}}/api/media_objects?type=profile
+```
+
+```
+POST {{base_url}}/api/media_objects
+Headers:
+  Authorization: Bearer {{token}}
+Body (form-data):
+  file: [select file]
+  type: profile
+```
+
+```
+DELETE {{base_url}}/api/media_objects/1
+Headers:
+  Authorization: Bearer {{token}}
+```
+
+### GraphQL
+
+#### GetAll - Liste de tous les médias
 
 ```graphql
 query GetAllMediaObjects {
   mediaObjects {
-    totalCount
     edges {
       node {
         id
-
         contentUrl
         filePath
         type
         createdAt
       }
     }
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
   }
 }
 ```
 
-### GetAll avec pagination et filtre par type
-
-```graphql
-query GetAllMediaObjectsPaginated($first: Int, $after: String, $type: String) {
-  mediaObjects(first: $first, after: $after, type: $type) {
-    totalCount
-    edges {
-      node {
-        id
-
-        contentUrl
-        filePath
-        type
-        createdAt
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-**Variables :**
-```json
-{
-  "first": 10,
-  "after": null,
-  "type": "profile"
-}
-```
-
-### GetById - Récupérer un média par ID
+#### GetById - Récupérer un média par ID
 
 ```graphql
 query GetMediaObjectById($id: ID!) {
@@ -1521,7 +1582,7 @@ query GetMediaObjectById($id: ID!) {
 }
 ```
 
-### Delete - Supprimer un média
+#### Delete - Supprimer un média
 
 ```graphql
 mutation DeleteMediaObject($id: ID!) {
@@ -1547,10 +1608,10 @@ mutation DeleteMediaObject($id: ID!) {
 
 ### Authentification
 
-La plupart des requêtes nécessitent un token JWT. Ajoutez le header suivant à vos requêtes :
+La plupart des requêtes nécessitent un token JWT. Dans Postman, configurez une variable d'environnement `{{token}}` et ajoutez le header :
 
 ```
-Authorization: Bearer <votre_token_jwt>
+Authorization: Bearer {{token}}
 ```
 
 ### Format des IDs
@@ -1564,25 +1625,17 @@ Les IDs dans GraphQL avec API Platform utilisent le format IRI (Internationalize
 - Users: `/api/users/{id}`
 - MediaObjects: `/api/media_objects/{id}`
 
-### Pagination
+### Configuration Postman
 
-Par défaut, API Platform limite les résultats à 30 éléments. Utilisez les paramètres de pagination :
-- `first`: Nombre d'éléments à récupérer
-- `after`: Curseur pour la page suivante
-- `last`: Nombre d'éléments depuis la fin
-- `before`: Curseur pour la page précédente
+Variables d'environnement recommandées :
+- `{{base_url}}` : URL de base de l'API (ex: `http://localhost:8000`)
 
-### Filtres disponibles
+### Résumé des filtres disponibles
 
-- **Actors**: `lastname`, `firstname`, `bio`, `photo`, `dob`, `dof`
-- **Movies**: `name`, `description`, `image`, `releaseDate`, `duration`
-- **Categories**: `name`
-- **Reviews**: `title`, `comment`, `rating`
-- **MediaObjects**: `type`
-
-### Types de médias
-
-- `profile`: Photos de profil (utilisateurs, acteurs, réalisateurs)
-- `movie_cover`: Couvertures de films
-- `other`: Autres types de médias
-
+| Entité | Filtres |
+|--------|---------|
+| **Actors** | `lastname` (start), `firstname` (start), `bio` (partial), `dob`, `dod` |
+| **Movies** | `name` (partial), `description` (partial), `releaseDate`, `duration` (range) |
+| **Categories** | `name` (partial) |
+| **Reviews** | `title` (partial), `comment` (partial), `rating` (range) |
+| **MediaObjects** | `type` (exact) |
