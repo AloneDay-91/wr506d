@@ -63,8 +63,8 @@ ENV APP_DEBUG=0
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Créer les dossiers nécessaires et définir les permissions
-RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles public/assets && \
-    chown -R www-data:www-data var/ public/uploads public/bundles public/assets && \
+RUN mkdir -p var/cache/prod var/log var/sessions public/uploads public/bundles public/assets public/media public/media/director public/media/movies public/media/other public/media/profiles && \
+    chown -R www-data:www-data var/ public/uploads public/bundles public/assets public/media public/media/director public/media/movies public/media/other public/media/profiles && \
     chmod -R 777 var/cache var/log var/sessions && \
     chmod -R 775 public/uploads public/bundles public/assets
 
