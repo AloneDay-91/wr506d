@@ -50,3 +50,14 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+.idea
+.env.dev
+.env.local
+.DS_Store
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
+
+/public/media/*
