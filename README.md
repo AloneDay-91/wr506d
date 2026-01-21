@@ -70,7 +70,7 @@
 ### 1. Cloner le repository
 
 ```bash
-git clone https://github.com/AloneDay-91/WR506D.git
+git clone https://github.com/AloneDay-91/wr506d.git
 cd WR506D
 ```
 
@@ -137,10 +137,10 @@ symfony server:start
 
 ### Endpoints principaux
 
-| Endpoint | Description |
-|----------|-------------|
-| `/api` | Documentation interactive (Swagger UI) |
-| `/api/graphql` | Endpoint GraphQL |
+| Endpoint                | Description |
+|-------------------------|-------------|
+| `/api/docs`             | Documentation interactive (Swagger UI) |
+| `/api/graphql`          | Endpoint GraphQL |
 | `/api/graphql/graphiql` | Interface GraphiQL |
 
 ### Entités disponibles
@@ -177,7 +177,7 @@ Cette documentation inclut :
 ### Obtenir un token JWT
 
 ```bash
-curl -X POST http://localhost:8000/api/login_check \
+curl -X POST http://localhost:8000/api/auth \
   -H "Content-Type: application/json" \
   -d '{"username": "user@example.com", "password": "password"}'
 ```
