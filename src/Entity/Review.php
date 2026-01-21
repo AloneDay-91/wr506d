@@ -17,10 +17,14 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use DateTimeImmutable;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['review:read']],
+    denormalizationContext: ['groups' => ['review:write']]
+)]
 #[ApiFilter(SearchFilter::class, properties: ['title' => 'partial', 'comment' => 'partial'])]
 #[ApiFilter(RangeFilter::class, properties: ['rating'])]
 
@@ -36,15 +40,18 @@ class Review
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['review:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'The title is required.')]
     #[Assert\Length(max: 255, maxMessage: 'The title cannot exceed 255 characters.')]
+    #[Groups(['review:read', 'review:write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'The comment is required.')]
+    #[Groups(['review:read', 'review:write'])]
     private ?string $comment = null;
 
     #[ORM\Column]
@@ -54,22 +61,27 @@ class Review
         max: 5,
         notInRangeMessage: 'The rating must be between {{ min }} and {{ max }}.'
     )]
+    #[Groups(['review:read', 'review:write'])]
     private ?int $rating = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'The user is required.')]
+    #[Groups(['review:read', 'review:write'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Movie::class, inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'The movie is required.')]
+    #[Groups(['review:read', 'review:write'])]
     private ?Movie $movie = null;
 
     #[ORM\Column]
+    #[Groups(['review:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['review:read'])]
     private ?DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int

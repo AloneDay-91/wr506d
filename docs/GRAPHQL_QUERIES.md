@@ -23,7 +23,6 @@ Ce document contient toutes les requêtes GraphQL et REST CRUD pour les entités
 | GET | `/api/actors` | Liste tous les acteurs | Public |
 | GET | `/api/actors/{id}` | Récupère un acteur | Public |
 | POST | `/api/actors` | Crée un acteur | ROLE_ADMIN |
-| PUT | `/api/actors/{id}` | Remplace un acteur | ROLE_ADMIN ou propriétaire |
 | PATCH | `/api/actors/{id}` | Modifie un acteur | ROLE_ADMIN ou propriétaire |
 | DELETE | `/api/actors/{id}` | Supprime un acteur | ROLE_ADMIN |
 
@@ -37,13 +36,13 @@ Ce document contient toutes les requêtes GraphQL et REST CRUD pour les entités
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/actors
-GET {{base_url}}/api/actors/1
-GET {{base_url}}/api/actors?lastname=Di
+GET {{S5_URL_PROD}}/api/actors
+GET {{S5_URL_PROD}}/api/actors/1
+GET {{S5_URL_PROD}}/api/actors?lastname=Di
 ```
 
 ```
-POST {{base_url}}/api/actors
+POST {{S5_URL_PROD}}/api/actors
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/json
@@ -59,21 +58,7 @@ Body (raw JSON):
 ```
 
 ```
-PUT {{base_url}}/api/actors/1
-Headers:
-  Authorization: Bearer {{token}}
-  Content-Type: application/json
-Body (raw JSON):
-{
-  "lastname": "DiCaprio",
-  "firstname": "Leonardo Wilhelm",
-  "dob": "1974-11-11",
-  "bio": "American actor, film producer, and environmentalist."
-}
-```
-
-```
-PATCH {{base_url}}/api/actors/1
+PATCH {{S5_URL_PROD}}/api/actors/1
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/merge-patch+json
@@ -84,7 +69,7 @@ Body (raw JSON):
 ```
 
 ```
-DELETE {{base_url}}/api/actors/1
+DELETE {{S5_URL_PROD}}/api/actors/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -257,7 +242,6 @@ mutation DeleteActor($id: ID!) {
   deleteActor(input: { id: $id }) {
     actor {
       id
-      _id
     }
   }
 }
@@ -281,7 +265,6 @@ mutation DeleteActor($id: ID!) {
 | GET | `/api/movies` | Liste tous les films | Public |
 | GET | `/api/movies/{id}` | Récupère un film | Public |
 | POST | `/api/movies` | Crée un film | ROLE_ADMIN |
-| PUT | `/api/movies/{id}` | Remplace un film | ROLE_ADMIN ou propriétaire |
 | PATCH | `/api/movies/{id}` | Modifie un film | ROLE_ADMIN ou propriétaire |
 | DELETE | `/api/movies/{id}` | Supprime un film | ROLE_ADMIN |
 
@@ -294,15 +277,15 @@ mutation DeleteActor($id: ID!) {
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/movies
-GET {{base_url}}/api/movies/1
-GET {{base_url}}/api/movies?name=Inception
-GET {{base_url}}/api/movies?duration[gte]=120&duration[lte]=180
-GET {{base_url}}/api/movies?releaseDate[after]=2010-01-01
+GET {{S5_URL_PROD}}/api/movies
+GET {{S5_URL_PROD}}/api/movies/1
+GET {{S5_URL_PROD}}/api/movies?name=Inception
+GET {{S5_URL_PROD}}/api/movies?duration[gte]=120&duration[lte]=180
+GET {{S5_URL_PROD}}/api/movies?releaseDate[after]=2010-01-01
 ```
 
 ```
-POST {{base_url}}/api/movies
+POST {{S5_URL_PROD}}/api/movies
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/json
@@ -323,21 +306,7 @@ Body (raw JSON):
 ```
 
 ```
-PUT {{base_url}}/api/movies/1
-Headers:
-  Authorization: Bearer {{token}}
-  Content-Type: application/json
-Body (raw JSON):
-{
-  "name": "Inception (Updated)",
-  "description": "Updated description",
-  "duration": 148,
-  "director": "/api/directors/1"
-}
-```
-
-```
-PATCH {{base_url}}/api/movies/1
+PATCH {{S5_URL_PROD}}/api/movies/1
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/merge-patch+json
@@ -348,7 +317,7 @@ Body (raw JSON):
 ```
 
 ```
-DELETE {{base_url}}/api/movies/1
+DELETE {{S5_URL_PROD}}/api/movies/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -607,7 +576,6 @@ mutation DeleteMovie($id: ID!) {
   deleteMovie(input: { id: $id }) {
     movie {
       id
-      _id
     }
   }
 }
@@ -631,18 +599,17 @@ mutation DeleteMovie($id: ID!) {
 | GET | `/api/directors` | Liste tous les réalisateurs | Public |
 | GET | `/api/directors/{id}` | Récupère un réalisateur | Public |
 | POST | `/api/directors` | Crée un réalisateur | ROLE_ADMIN |
-| PUT | `/api/directors/{id}` | Remplace un réalisateur | ROLE_ADMIN ou propriétaire |
 | DELETE | `/api/directors/{id}` | Supprime un réalisateur | ROLE_ADMIN |
 
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/directors
-GET {{base_url}}/api/directors/1
+GET {{S5_URL_PROD}}/api/directors
+GET {{S5_URL_PROD}}/api/directors/1
 ```
 
 ```
-POST {{base_url}}/api/directors
+POST {{S5_URL_PROD}}/api/directors
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/json
@@ -656,20 +623,7 @@ Body (raw JSON):
 ```
 
 ```
-PUT {{base_url}}/api/directors/1
-Headers:
-  Authorization: Bearer {{token}}
-  Content-Type: application/json
-Body (raw JSON):
-{
-  "lastname": "Nolan",
-  "firstname": "Christopher Edward",
-  "dob": "1970-07-30"
-}
-```
-
-```
-DELETE {{base_url}}/api/directors/1
+DELETE {{S5_URL_PROD}}/api/directors/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -828,7 +782,6 @@ mutation DeleteDirector($id: ID!) {
   deleteDirector(input: { id: $id }) {
     director {
       id
-      _id
     }
   }
 }
@@ -852,7 +805,6 @@ mutation DeleteDirector($id: ID!) {
 | GET | `/api/categories` | Liste toutes les catégories | Public |
 | GET | `/api/categories/{id}` | Récupère une catégorie | Public |
 | POST | `/api/categories` | Crée une catégorie | ROLE_ADMIN |
-| PUT | `/api/categories/{id}` | Remplace une catégorie | ROLE_ADMIN ou propriétaire |
 | DELETE | `/api/categories/{id}` | Supprime une catégorie | ROLE_ADMIN |
 
 **Filtres disponibles:**
@@ -861,13 +813,13 @@ mutation DeleteDirector($id: ID!) {
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/categories
-GET {{base_url}}/api/categories/1
-GET {{base_url}}/api/categories?name=Action
+GET {{S5_URL_PROD}}/api/categories
+GET {{S5_URL_PROD}}/api/categories/1
+GET {{S5_URL_PROD}}/api/categories?name=Action
 ```
 
 ```
-POST {{base_url}}/api/categories
+POST {{S5_URL_PROD}}/api/categories
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/json
@@ -879,18 +831,7 @@ Body (raw JSON):
 ```
 
 ```
-PUT {{base_url}}/api/categories/1
-Headers:
-  Authorization: Bearer {{token}}
-  Content-Type: application/json
-Body (raw JSON):
-{
-  "name": "Sci-Fi"
-}
-```
-
-```
-DELETE {{base_url}}/api/categories/1
+DELETE {{S5_URL_PROD}}/api/categories/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -1011,7 +952,6 @@ mutation DeleteCategory($id: ID!) {
   deleteCategory(input: { id: $id }) {
     category {
       id
-      _id
     }
   }
 }
@@ -1035,7 +975,6 @@ mutation DeleteCategory($id: ID!) {
 | GET | `/api/reviews` | Liste tous les avis | Public |
 | GET | `/api/reviews/{id}` | Récupère un avis | Public |
 | POST | `/api/reviews` | Crée un avis | ROLE_USER |
-| PUT | `/api/reviews/{id}` | Remplace un avis | ROLE_ADMIN ou propriétaire |
 | PATCH | `/api/reviews/{id}` | Modifie un avis | ROLE_ADMIN ou propriétaire |
 | DELETE | `/api/reviews/{id}` | Supprime un avis | ROLE_ADMIN ou propriétaire |
 
@@ -1047,14 +986,14 @@ mutation DeleteCategory($id: ID!) {
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/reviews
-GET {{base_url}}/api/reviews/1
-GET {{base_url}}/api/reviews?rating[gte]=4
-GET {{base_url}}/api/reviews?title=Amazing
+GET {{S5_URL_PROD}}/api/reviews
+GET {{S5_URL_PROD}}/api/reviews/1
+GET {{S5_URL_PROD}}/api/reviews?rating[gte]=4
+GET {{S5_URL_PROD}}/api/reviews?title=Amazing
 ```
 
 ```
-POST {{base_url}}/api/reviews
+POST {{S5_URL_PROD}}/api/reviews
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/json
@@ -1069,7 +1008,7 @@ Body (raw JSON):
 ```
 
 ```
-PATCH {{base_url}}/api/reviews/1
+PATCH {{S5_URL_PROD}}/api/reviews/1
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/merge-patch+json
@@ -1081,7 +1020,7 @@ Body (raw JSON):
 ```
 
 ```
-DELETE {{base_url}}/api/reviews/1
+DELETE {{S5_URL_PROD}}/api/reviews/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -1234,7 +1173,6 @@ mutation DeleteReview($id: ID!) {
   deleteReview(input: { id: $id }) {
     review {
       id
-      _id
     }
   }
 }
@@ -1260,26 +1198,25 @@ mutation DeleteReview($id: ID!) {
 | GET | `/api/users` | Liste tous les utilisateurs | ROLE_ADMIN |
 | GET | `/api/users/{id}` | Récupère un utilisateur | ROLE_ADMIN |
 | POST | `/api/users` | Crée un utilisateur | Public |
-| PUT | `/api/users/{id}` | Remplace un utilisateur | ROLE_USER ou ROLE_ADMIN |
 | PATCH | `/api/users/{id}` | Modifie un utilisateur | ROLE_USER ou ROLE_ADMIN |
 | DELETE | `/api/users/{id}` | Supprime un utilisateur | ROLE_ADMIN |
 
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/users
+GET {{S5_URL_PROD}}/api/users
 Headers:
   Authorization: Bearer {{admin_token}}
 ```
 
 ```
-GET {{base_url}}/api/users/1
+GET {{S5_URL_PROD}}/api/users/1
 Headers:
   Authorization: Bearer {{admin_token}}
 ```
 
 ```
-POST {{base_url}}/api/users
+POST {{S5_URL_PROD}}/api/users
 Headers:
   Content-Type: application/json
 Body (raw JSON):
@@ -1292,7 +1229,7 @@ Body (raw JSON):
 ```
 
 ```
-PATCH {{base_url}}/api/users/1
+PATCH {{S5_URL_PROD}}/api/users/1
 Headers:
   Authorization: Bearer {{token}}
   Content-Type: application/merge-patch+json
@@ -1304,7 +1241,7 @@ Body (raw JSON):
 ```
 
 ```
-DELETE {{base_url}}/api/users/1
+DELETE {{S5_URL_PROD}}/api/users/1
 Headers:
   Authorization: Bearer {{admin_token}}
 ```
@@ -1479,7 +1416,6 @@ mutation DeleteUser($id: ID!) {
   deleteUser(input: { id: $id }) {
     user {
       id
-      _id
     }
   }
 }
@@ -1520,13 +1456,13 @@ mutation DeleteUser($id: ID!) {
 **Exemples Postman:**
 
 ```
-GET {{base_url}}/api/media_objects
-GET {{base_url}}/api/media_objects/1
-GET {{base_url}}/api/media_objects?type=profile
+GET {{S5_URL_PROD}}/api/media_objects
+GET {{S5_URL_PROD}}/api/media_objects/1
+GET {{S5_URL_PROD}}/api/media_objects?type=profile
 ```
 
 ```
-POST {{base_url}}/api/media_objects
+POST {{S5_URL_PROD}}/api/media_objects
 Headers:
   Authorization: Bearer {{token}}
 Body (form-data):
@@ -1535,7 +1471,7 @@ Body (form-data):
 ```
 
 ```
-DELETE {{base_url}}/api/media_objects/1
+DELETE {{S5_URL_PROD}}/api/media_objects/1
 Headers:
   Authorization: Bearer {{token}}
 ```
@@ -1589,7 +1525,6 @@ mutation DeleteMediaObject($id: ID!) {
   deleteMediaObject(input: { id: $id }) {
     mediaObject {
       id
-      _id
     }
   }
 }
@@ -1628,7 +1563,7 @@ Les IDs dans GraphQL avec API Platform utilisent le format IRI (Internationalize
 ### Configuration Postman
 
 Variables d'environnement recommandées :
-- `{{base_url}}` : URL de base de l'API (ex: `http://localhost:8000`)
+- `{{S5_URL_PROD}}` : URL de base de l'API (ex: `http://localhost:8000`)
 
 ### Résumé des filtres disponibles
 
