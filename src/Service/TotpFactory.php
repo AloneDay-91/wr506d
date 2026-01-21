@@ -6,7 +6,7 @@ use OTPHP\TOTP;
 use OTPHP\TOTPInterface;
 
 /**
- * @SuppressWarnings(PHPMD.StaticAccess)
+ * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class TotpFactory
 {
