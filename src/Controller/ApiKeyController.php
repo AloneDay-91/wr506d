@@ -83,7 +83,7 @@ class ApiKeyController extends AbstractController
     /**
      * Toggle the API key enabled status
      */
-    #[Route('/toggle', name: 'api_key_toggle', methods: ['PATCH'])]
+    #[Route('', name: 'api_key_toggle', methods: ['PATCH'])]
     public function toggle(): JsonResponse
     {
         /** @var User $user */
